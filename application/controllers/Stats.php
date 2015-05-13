@@ -17,6 +17,17 @@ class Stats extends CI_Controller
     echo $text;
   }
   
+  public function get($id) 
+  {
+    header('Access-Control-Allow-Origin: *');
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+    header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+    
+    $this->load->database();
+    $query = $this->db->get_where('stats', array('id =' => $id), 1, 0);
+    echo json_encode($query->result());
+  }
+  
 	public function search() 
   {
     header('Access-Control-Allow-Origin: *');
