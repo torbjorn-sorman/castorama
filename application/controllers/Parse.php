@@ -3,7 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Parse extends CI_Controller 
 {
-  private $cnt = 0;
+  private $cntM = 0;
+  private $cntW = 0;
   private $url = "http://www.friidrott.se/rs/resultat.aspx";
   private $whitelistTable = 'club_whitelist';
   private $year = 0;
@@ -56,7 +57,7 @@ class Parse extends CI_Controller
       $this->db->query("ALTER TABLE `$tableName` ADD UNIQUE INDEX (`key`)");
     }
     
-    foreach(range(2001, 2001, 1) as $year) {
+    foreach(range(2001, 2014, 1) as $year) {
       $this->year = $year;
       $doc = new DOMDocument();
       @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
@@ -65,114 +66,39 @@ class Parse extends CI_Controller
         $this->parseItem($doc, $item, $tableName);
       }
     }
+    print "M:{$this->cntM} W:{$this->cntW}<br>";
     
     print sprintf("%.2f",(microtime(TRUE)-$time)). ' seconds and '. (memory_get_usage()-$memory). ' bytes';
   }
   
   private function parseItem($doc, $item, $table) {
     if ($item->childNodes->length == 0)
-      return false;  
-    $headline = array();    
+      return false;     
+    $all_club = false;
     foreach($item->childNodes as $child) {
       if (stripos($child->textContent, "Samtliga") !== false) {
-        $headline['club'] = $this->getClubFromHeadline($child->textContent);
+        $all_club = $this->getClubFromHeadline($child->textContent);
         break;
       }
     }
     $str = $item->textContent;
-    $headline = $this->extractHeadline($str);
-    /*
-    $men = "";
-    $women = "";
-    $len = $item->childNodes->length;
-    $dataType = array();
-    $probe = -1;
-    foreach($item->childNodes as $child) {      
-      array_push($dataType, $probe);
-      $text = $child->textContent;
-      if (stripos($text, "M:") !== false || stripos($text, "M \"fel hand\":") !== false)
-        $probe = 1;
-      if (stripos($text, "K:") !== false || stripos($text, "K \"fel hand\":") !== false)
-        $probe = 0;
-    }
-    for($i = 0; $i < count($dataType); ++$i) {
-      if ($dataType[$i] == 0) $women .= $item->childNodes->item($i)->textContent;
-      else if ($dataType[$i] == 1) $men .= $item->childNodes->item($i)->textContent;
-    }
-    /*
-      
+    $headline = $this->extractHeadline($str, $all_club);        
+    $women = $this->extractResults($str, "/K\s*\"fel hand\"\s*:\s*(.+)/i");
+    $women = $this->extractResults($str, "/K\s*:\s*(.+)/i").$women;    
+    $men = $this->extractResults($str, "/M\s*\"fel hand\"\s*:\s*(.+)/i");
+    $men = $this->extractResults($str, "/M\s*:\s*(.+)/i").$men;
     
-    for($i = 0; $i < $len; ++$i) {
-      $text = $item->childNodes->item($i)->textContent;
-      if (stripos($text, "M:") !== false || stripos($text, "M \"fel hand\":") !== false) {
-        $text = $item->childNodes->item(++$i)->textContent;
-        while(stripos($text, "K:") === false) {
-          $men .= $text;
-          if (++$i >= $len)
-            break;
-          $text = $item->childNodes->item($i)->textContent;
-        }
-      }
-      if (stripos($text, "K:") !== false || stripos($text, "K \"fel hand\":") !== false) {
-        $text = $item->childNodes->item(++$i)->textContent;
-        while(true) {
-          $women .= $text;
-          if (++$i >= $len)
-            break;
-          $text = $item->childNodes->item($i)->textContent;
-        }
-      }
-    }
-    */
-    //echo "{$headline['date']} {$headline['location']} <br/>";
-    //return false;
-    //$men = $this->extractResults($str, "/(M.*:(.+))(K.*:|$)/i");    
-    //$women = $this->extractResults($str, "/.*(K.*:(.+))/i");
-    
-    /*
-    $headline = explode(" ", $item->getElementsByTagName('span')->item(0)->textContent);
-    $date = $this->toDate($headline[0]);
-    $location = implode(" ", array_slice($headline, 1, count($headline) - 2));
-    
-    
-    $m = "";
-    $k = "";
-    $club = array();
-    echo $item->textContent."<br/>";
-    
-    $len = $item->childNodes->length;
-    for($i = 0; $i < $len; ++$i) {
-      $child = $item->childNodes->item($i)->textContent;
-      
-      if (stripos($child, "Anm") !== false)
-        continue;
-      
-      if (stripos($child, "Samtliga") !== false) {        
-        $club = $this->getClubFromHeadline($child);
-        if ($i == $item->childNodes->length) break;
-      }
-      
-      if (stripos($child, "M:") !== false || stripos($child, "M \"fel hand\":") !== false)
-        for ($n = $i; $n < $len; ++$n) {
-          
-          if (stripos($child, "M:") !== false || stripos($child, "M \"fel hand\":") !== false) {
-            
-          }
-        }
-        $m = $item->childNodes->item(++$i)->textContent;
-      if (stripos($child, "K:") !== false)
-        $k = $item->childNodes->item(++$i)->textContent;
-      
-    }
-    */
     // Catch known manual input errors... dirty but effective ;-)
-    $err = array("!", ". ", "700m", "81256", "(1348  7166  3690  5307", " 4) ");
-    $cor = array("", ", ", "700,", "(1256", "(1348  7166  3690  5307)", " ");
+    $err = array("!", ". ", "700m", "81256", "(1348  7166  3690  5307", " 4) ", "1.2476");
+    $cor = array("", ", ", "700,", "(1256", "(1348  7166  3690  5307)", " ", "1.247");
     $mRes = str_replace(".", "", $this->explodeNoEmpty(",", str_replace($err, $cor, $men)));
     
     $err = array("!", ". ", "(1173  2653  4343  2073", ")1108", " 1) ");
     $cor = array("", ", ", "(1173  2653  4343  2073)", "(1108", " ");
     $wRes = str_replace(".", "", $this->explodeNoEmpty(",", str_replace($err, $cor, $women)));
+    
+    $this->cntM += count($mRes);
+    $this->cntW += count($wRes);
     
     $results = array();
     if ($men)
@@ -184,13 +110,15 @@ class Parse extends CI_Controller
     $this->addRecords($table, $results);
   }
   
-  private function wrapRecord($rec, $sex, $head) {
+  private function wrapRecord($rec, $sex, $head)
+  {
     $rec['sex'] = $sex;
     $rec['date'] = $head['date'];
     $rec['location'] = $head['location'];
-    $rec['club'] = "blaj";
-    if (!array_key_exists('club', $rec) || $rec['club'] == ""){
-      $rec['club'] = trim(implode(" ", $head['club']));    
+    if (!array_key_exists('club', $rec) || $rec['club'] == "") {
+      var_dump($rec);
+      var_dump($head);
+      $rec['club'] = trim(implode(" ", $head['club']));
     }
     $ev = array_key_exists('events', $rec) && $rec['events'];
     $rec['shot'] = $ev ? $rec['events'][0] : 0;
@@ -209,8 +137,9 @@ class Parse extends CI_Controller
     $strcpy = substr($str, 0);
     $nStr = $this->explodeNoEmpty(" ", trim($str));    
     $score = array_pop($nStr);
-    if (!is_numeric($score))
+    if (!is_numeric($score)) {
       return false;
+    }
     
     $index = -1;
     $birthyear = $this->extractYear($nStr, $index);
@@ -226,14 +155,16 @@ class Parse extends CI_Controller
     );
   }
   
-  private function extractHeadline(&$str)
+  private function extractHeadline(&$str, $club)
   {
     $res = array();
+    if ($club)
+      $res['club'] = $club;
     $pattern = "/^\s*(\d{1,2})\.(\d{1,2})\s*(.+)\s*\(Castorama\)/";
     if (preg_match($pattern, $str, $match) == 1) {
       $str = str_replace($match[0], "", $str);
       $res['date'] = $this->year."-".sprintf("%02d", $match[2])."-".sprintf("%02d", $match[1]);
-      $res['location'] = trim($match[3]);
+      $res['location'] = trim($match[3]);      
       return $res;
     }
     return false;
@@ -242,11 +173,9 @@ class Parse extends CI_Controller
   private function extractResults(&$str, $pattern)
   {
     $res = array();
-    if (preg_match($pattern, $str, $match) == 1) {
-      $str = str_replace($match[1], "", $str);
-      if ($pattern == "/.*(K.{0,12}:(.+))/i")
-        var_dump($match);
-      return $match[2];
+    if (preg_match($pattern, $str, $match) == 1) { 
+      $str = str_replace($match[0], "", $str);      
+      return $match[1];
     }
     return false;
   }
@@ -255,9 +184,9 @@ class Parse extends CI_Controller
   {
     $res = array(0, 0, 0, 0);
     $pattern = "/\((.*?)\)/";
-    while (preg_match($pattern, $str, $pMatch) == 1) {
-      $str = str_replace($pMatch[0], "", $str);
-      $res = $this->getEvents($pMatch[0]);
+    while (preg_match($pattern, $str, $match) == 1) {
+      $str = str_replace($match[0], "", $str);
+      $res = $this->getEvents($match[0]);
     }
     $test = -1;
     if ($test = strpos($str, "(")) {      
@@ -309,15 +238,20 @@ class Parse extends CI_Controller
   
   private function addRecords($table, $res) 
   {
-    if (count($res) == 0)
-      return;
-    $insert_query = $this->db->insert_string($table, $res[0]);
-    $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $insert_query);    
-    $cnt = 0;
-    if (count($res) > 1) {
-      for($i = 1; $i < count($res); ++$i) {
-        if (count(array_keys($res[$i])) == 11)
+    if (count($res) == 0) {
+      return false;
+    }
+    $init = 0;
+    while ($init < count($res) && count(array_keys($res[$init])) != 12)
+      var_dump($res[$init++]);
+    $insert_query = $this->db->insert_string($table, $res[$init++]);
+    $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $insert_query);        
+    if (count($res) > $init) {
+      for($i = $init; $i < count($res); ++$i) {
+        if (count(array_keys($res[$i])) == 12)
           $sql .= ",(".$this->iterValues($res[$i]).")";
+        else
+          var_dump($res[$i]);
       }
     }
     $sql .= ";";
@@ -337,16 +271,12 @@ class Parse extends CI_Controller
   {
     if (count($names) == 0)
       return;
-    
     $sql = $this->db->insert_string($this->whitelistTable, array(
       'partial_name' => trim($names[0]),
       'ref' => 1,
       'valid' => 1,
       'year' => $this->year      
     ));
-      
-    //$sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $insert_query);
-    
     if (count($names) > 1) {
       for($i = 1; $i < count($names); ++$i)
         $sql .= ",('".trim($names[$i])."', {$this->year}, 1)";
