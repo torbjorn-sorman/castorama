@@ -8,13 +8,45 @@ class Parse extends CI_Controller
   private $url = "http://www.friidrott.se/rs/resultat.aspx";
   private $whitelistTable = 'club_whitelist';
   private $year = 0;
-  private $poulateWhitelist = false;
+  private $poulateWhitelist = false; 
+  private $clubRej = array();
   
-  public function create($tableName = 'results')
+  private $errorMen = array(
+    "!" => "",
+    "§" => "",
+    "\t" => " ",
+    ". " => ", ",
+    "700m" => "700,",
+    "81256" => "(1256",
+    "(1348  7166  3690  5307" => "(1348  7166  3690  5307)",
+    "1.2476" => "1.247",
+    "1.,744" => "1744",
+    "92703" => "92 703",
+    "4777" => "477"
+  );
+  
+  private $errorWomen = array(
+    "Wedevåg (2.3" => "Wedevåg 23",
+    "1.420.l" => "1420",
+    "\t" => " ",
+    "!" => "",
+    ". " => ", ",
+    "(1173  2653  4343  2073" => "(1173  2653  4343  2073)",
+    ")1108" => "(1108",
+    "Sandin 912" => "Sandin 92",
+    "HjelmHuddinge" => "Hjelm Huddinge",
+    "4270" => "427"
+  );
+  
+  public function create($tableName = 'results', $start = '2001', $end = '2014')
   {
     if ($tableName == 'stats')
       return;
-            
+    $v = intval($start);
+    $ve = intval($end);
+    if (!(is_numeric($v) && $v > 2000 && is_numeric($ve) && $ve >= $v)) {
+      return;
+    }
     $time = microtime(TRUE);
     $memory = memory_get_usage();
     
@@ -28,7 +60,8 @@ class Parse extends CI_Controller
       $this->dbforge->drop_table($tableName);
     
     if (!$this->db->table_exists($this->whitelistTable)) {
-      $this->dbforge->add_field(array(
+      $this->dbforge->add_field('id');
+      $this->dbforge->add_field(array(        
         'partial_name' => array('type' => 'VARCHAR', 'constraint' => 100),
         'ref' => array('type' => 'INT', 'constraint' => 8),
         'valid' => array('type' => 'INT', 'constraint' => 2),
@@ -57,7 +90,7 @@ class Parse extends CI_Controller
       $this->db->query("ALTER TABLE `$tableName` ADD UNIQUE INDEX (`key`)");
     }
     
-    foreach(range(2001, 2014, 1) as $year) {
+    foreach(range(intval($start), intval($end), 1) as $year) {
       $this->year = $year;
       $doc = new DOMDocument();
       @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
@@ -66,7 +99,11 @@ class Parse extends CI_Controller
         $this->parseItem($doc, $item, $tableName);
       }
     }
-    print "M:{$this->cntM} W:{$this->cntW}<br>";
+    echo "<p>Rejected club names (should be names or part of names):</p><ul>";
+    foreach($this->clubRej as $r)
+      echo "<li>$r</li>";
+    echo "</ul>";
+    print "<br/>M:{$this->cntM} W:{$this->cntW}<br>";
     
     print sprintf("%.2f",(microtime(TRUE)-$time)). ' seconds and '. (memory_get_usage()-$memory). ' bytes';
   }
@@ -75,38 +112,64 @@ class Parse extends CI_Controller
     if ($item->childNodes->length == 0)
       return false;     
     $all_club = false;
-    foreach($item->childNodes as $child) {
-      if (stripos($child->textContent, "Samtliga") !== false) {
-        $all_club = $this->getClubFromHeadline($child->textContent);
+    foreach($item->childNodes as $child)
+      if ($all_club = $this->getClubFromHeadline(trim($child->textContent)))
         break;
-      }
+    $item->removeChild($resHeadline = $item->getElementsByTagName('span')->item(0));    
+    $headline = $this->extractHeadline($resHeadline->textContent, $all_club);    
+    
+    // Catch Critical known input errors (or irregularities)  
+    $str = str_replace(
+      array("M: Sofia ", "M: Marie", "M: Anna ", "M: Maria ", "K: Martin "), 
+      array("K: Sofia ", "K: Marie", "K: Anna ", "K: Maria ", "M: Martin "),
+      $item->textContent
+    );
+    // capture common input errors    
+    $this->str_replace_patterns($str);
+    
+    $mpos = stripos($str, "M:");
+    $kpos = stripos($str, "K:");
+    if ($mpos === false || $kpos === false || $mpos < $kpos) {
+      $women = $this->extractResults($str, "/K\s*\"fel hand\"\s*:\s*(.+)/i");
+      $women = $this->extractResults($str, "/K\s*:\s*(.+)/i").",$women";    
+      $men = $this->extractResults($str, "/M\s*\"fel hand\"\s*:\s*(.+)/i");
+      $men = $this->extractResults($str, "/M\s*:\s*(.+)/i").",$men";
+    } else {
+      $men = $this->extractResults($str, "/M\s*\"fel hand\"\s*:\s*(.+)/i");
+      $men = $this->extractResults($str, "/M\s*:\s*(.+)/i").",$men";
+      $women = $this->extractResults($str, "/K\s*\"fel hand\"\s*:\s*(.+)/i");
+      $women = $this->extractResults($str, "/K\s*:\s*(.+)/i").",$women";  
     }
-    $str = $item->textContent;
-    $headline = $this->extractHeadline($str, $all_club);        
-    $women = $this->extractResults($str, "/K\s*\"fel hand\"\s*:\s*(.+)/i");
-    $women = $this->extractResults($str, "/K\s*:\s*(.+)/i").$women;    
-    $men = $this->extractResults($str, "/M\s*\"fel hand\"\s*:\s*(.+)/i");
-    $men = $this->extractResults($str, "/M\s*:\s*(.+)/i").$men;
     
-    // Catch known manual input errors... dirty but effective ;-)
-    $err = array("!", ". ", "700m", "81256", "(1348  7166  3690  5307", " 4) ", "1.2476");
-    $cor = array("", ", ", "700,", "(1256", "(1348  7166  3690  5307)", " ", "1.247");
+    // Catch known input errors (or irregularities)
+    /*
+    $err = array("!", "§", "\t", ". ", "700m", "81256", "(1348  7166  3690  5307", "1.2476", "1.,744", "92703", "4777");
+    $cor = array("", "", " ", ", ", "700,", "(1256", "(1348  7166  3690  5307)", "1.247", "1744", "92 703", "477");    
     $mRes = str_replace(".", "", $this->explodeNoEmpty(",", str_replace($err, $cor, $men)));
+    */
+    if (strpos($women, "89 Wedevåg"))
+      echo "$women<br/>";
     
-    $err = array("!", ". ", "(1173  2653  4343  2073", ")1108", " 1) ");
-    $cor = array("", ", ", "(1173  2653  4343  2073)", "(1108", " ");
+    $mRes = $this->explodeNoEmpty(",", strtr(strtr($men, $this->errorMen), array("." => ""))); 
+    $wRes = $this->explodeNoEmpty(",", strtr(strtr($women, $this->errorWomen), array("." => ""))); 
+    /*
+    $err = array("Wedevåg \(2", "1.420.l", "\t", "!", ". ", "(1173  2653  4343  2073", ")1108", "Sandin 912", "HjelmHuddinge", "4270");
+    $cor = array("Wedevåg 2","1420", " ", "", ", ", "(1173  2653  4343  2073)", "(1108", "Sandin 92", "Hjelm Huddinge", "427");
     $wRes = str_replace(".", "", $this->explodeNoEmpty(",", str_replace($err, $cor, $women)));
+    */
     
-    $this->cntM += count($mRes);
-    $this->cntW += count($wRes);
     
     $results = array();
-    if ($men)
-      foreach($mRes as $record)
+    if ($men) {
+      foreach($mRes as $record) {
         array_push($results, $this->wrapRecord($this->parseRecord($record), 1, $headline));
-    if ($women)
-      foreach($wRes as $record)
+      }
+    }
+    if ($women) {
+      foreach($wRes as $record) {
         array_push($results, $this->wrapRecord($this->parseRecord($record), 0, $headline));
+      }
+    }
     $this->addRecords($table, $results);
   }
   
@@ -115,10 +178,8 @@ class Parse extends CI_Controller
     $rec['sex'] = $sex;
     $rec['date'] = $head['date'];
     $rec['location'] = $head['location'];
-    if (!array_key_exists('club', $rec) || $rec['club'] == "") {
-      var_dump($rec);
-      var_dump($head);
-      $rec['club'] = trim(implode(" ", $head['club']));
+    if (!array_key_exists('club', $rec) || !$rec['club']) {
+      $rec['club'] = $head['club'] ? trim($head['club']) : false;
     }
     $ev = array_key_exists('events', $rec) && $rec['events'];
     $rec['shot'] = $ev ? $rec['events'][0] : 0;
@@ -133,14 +194,14 @@ class Parse extends CI_Controller
   // Pattern Name [Birth] [Club] Score [events]
   private function parseRecord($str)
   { 
-    $eventRes = $this->extractParenthesis($str);
+    echo "$str<br/>";
     $strcpy = substr($str, 0);
+    $eventRes = $this->extractParenthesis($str);    
     $nStr = $this->explodeNoEmpty(" ", trim($str));    
     $score = array_pop($nStr);
     if (!is_numeric($score)) {
       return false;
-    }
-    
+    }    
     $index = -1;
     $birthyear = $this->extractYear($nStr, $index);
     $name_count = $index == -1 ? $this->getNameLength($nStr) : $index;
@@ -149,22 +210,22 @@ class Parse extends CI_Controller
     return array(
       'name' => $name,
       'birthyear' => $birthyear,
-      'club' => $club,
+      'club' => $club == "" ? false : $club,
       'score' => $score,
       'events' => $eventRes
     );
   }
   
-  private function extractHeadline(&$str, $club)
+  private function extractHeadline($str, $club)
   {
     $res = array();
-    if ($club)
-      $res['club'] = $club;
-    $pattern = "/^\s*(\d{1,2})\.(\d{1,2})\s*(.+)\s*\(Castorama\)/";
+    $res['club'] = $club;
+    $pattern = "/^(\s*|\d{1,2}.)(\d{1,2}|\?{1,2})\.(\d{1,2}|\?{1,2})\s*(.+)$/";
     if (preg_match($pattern, $str, $match) == 1) {
-      $str = str_replace($match[0], "", $str);
-      $res['date'] = $this->year."-".sprintf("%02d", $match[2])."-".sprintf("%02d", $match[1]);
-      $res['location'] = trim($match[3]);      
+      $d = $match[2][0] == "?" ? 1 : $match[2];
+      $m = $match[3][0] == "?" ? 10 : $match[3];
+      $res['date'] = $this->year."-".sprintf("%02d", $m)."-".sprintf("%02d", $d);
+      $res['location'] = trim(str_replace("(Castorama)", "", $match[4]));      
       return $res;
     }
     return false;
@@ -177,7 +238,7 @@ class Parse extends CI_Controller
       $str = str_replace($match[0], "", $str);      
       return $match[1];
     }
-    return false;
+    return '';
   }
   
   private function extractParenthesis(&$str)
@@ -198,12 +259,63 @@ class Parse extends CI_Controller
     return $res;
   }
   
+  private function str_replace_patterns(&$str)
+  {
+    while (preg_match("/\d,\d{3}/", $str, $match) == 1) {
+      //echo "$str<br/>";
+      $str = str_replace($match[0], substr_replace($match[0], "", 1, 1), $str);    
+    }
+    while (preg_match("/(\s|^)\d\)\s/", $str, $match) == 1) {
+      //echo "$str<br/>";
+      $str = str_replace($match[0], " ", $str);
+    }
+    while (preg_match("/(\d\.\d{3})\d/", $str, $match) == 1) {
+      //echo "$str<br/>";
+      $str = str_replace($match[0], $match[1], $str);      
+    }
+    while (preg_match("/(\d{2})(\d\.\d{3})/", $str, $match) == 1) {
+      //echo "$str<br/>";
+      $str = str_replace($match[0], $match[1]." ".$match[2], $str);
+    }
+    while (preg_match("/([^\s\d])(\d\.\d{3})/", $str, $match) == 1) {
+      //echo "$str<br/>";
+      $str = str_replace($match[0], $match[1]." ".$match[2], $str);      
+    }
+    while (preg_match("/Dag \d(.*)Dag \d(.*)/i", $str, $match) == 1) {
+      //echo "$str<br/>";
+      $men = "";
+      $women = "";
+      $rest = "";
+      $w; $m;
+      if (preg_match("/(K:.+)$/", $match[1], $w) == 1) {
+        $women = $w[1]; 
+        if (preg_match("/(M:.+)$/", str_replace($w[0], "", $match[1]), $m) == 1) {
+          $men = $m[1];
+        }       
+      } else if (preg_match("/(M:.+)$/", $match[1], $m) == 1) {
+        $men = $m[1];
+      }
+      if (preg_match("/K:(.+)$/", $match[2], $w) == 1) {
+        $women .= $women == "" ? "K: " : "," . $w[1];
+        if (preg_match("/M:(.+)$/", str_replace($w[0], "", $match[2]), $m) == 1) {
+          $men .= $men == "" ? "M: " : ", " . $m[1];
+        }       
+      } else if (preg_match("/(M:.+)$/", $match[2], $m) == 1) {
+        $men .= $men == "" ? "M: " : ", " . $m[1];
+      }
+      $str = str_replace($match[0], "$men. $women.", $str);      
+    }
+  }
+  
   private function getEvents($str) 
   {
     $res = array(0, 0, 0, 0);
-    $pattern = "/([^\d]|[\(\)])(((\d{3,4}|[xX])\s*){4}).*[\)\(]/";
+    $pattern = "/([^\d]|[\(\)])(((\d{3,5}|[xX])\s*){4}).*[\)\(]/";
     if (preg_match($pattern, $str, $match) == 1) {
       $res = $this->explodeNoEmpty(" ", $match[2]);
+      for($i = 0; $i < count($res); ++$i)
+        if (strlen($res[$i]) > 4)
+          $res[$i] = substr($res[$i], 0, 4);
     } else {
       $cnt = 0;
       foreach(array("kula", "spjut", "diskus", "slägga") as $e) {      
@@ -227,31 +339,40 @@ class Parse extends CI_Controller
   
   private function whitelistedClub($club) 
   {
+    if (!$club || $club == "")
+      return false;
     if ($this->poulateWhitelist) {
       $this->addClubToWhitelist(array($club));
       return true;
     }
     $sql = "SELECT EXISTS(SELECT 1 FROM {$this->whitelistTable} WHERE partial_name ='$club' AND valid =1 LIMIT 1)";
-    $resp = $this->db->query($sql);        
-    return $resp->num_rows();
+    $resp = $this->db->query($sql);    
+    foreach($resp->result()[0] as $response) {      
+      if (intval($response) == 0) {
+        array_push($this->clubRej, $club." \t".$this->year);
+        return false;
+      }
+      return true;
+    }
   }
   
   private function addRecords($table, $res) 
   {
     if (count($res) == 0) {
       return false;
-    }
+    }    
     $init = 0;
-    while ($init < count($res) && count(array_keys($res[$init])) != 12)
-      var_dump($res[$init++]);
-    $insert_query = $this->db->insert_string($table, $res[$init++]);
-    $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $insert_query);        
+    while ($init < count($res) && ($res[$init] == null || count(array_keys($res[$init])) != 12))
+      ++$init;
+    if ($res[$init]['club'] === false) $res[$init]['club'] = '';
+    $insert_query = $this->db->insert_string($table, $res[$init++]);    
+    $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $insert_query);     
+    if ($res[$init - 1]['sex'] == 1) ++$this->cntM; else ++$this->cntW; 
     if (count($res) > $init) {
-      for($i = $init; $i < count($res); ++$i) {
+      for($i = $init; $i < count($res); ++$i) {        
+        if ($res[$i]['sex'] == 1) ++$this->cntM; else ++$this->cntW;
         if (count(array_keys($res[$i])) == 12)
           $sql .= ",(".$this->iterValues($res[$i]).")";
-        else
-          var_dump($res[$i]);
       }
     }
     $sql .= ";";
@@ -261,7 +382,7 @@ class Parse extends CI_Controller
   private function iterValues($obj)
   {
     $str = "";
-    foreach($obj as $e) {      
+    foreach($obj as $e) {
       $str .= "'$e', ";
     }
     return substr($str, 0, strlen($str) - 2);
@@ -286,16 +407,11 @@ class Parse extends CI_Controller
   }
   
   private function getClubFromHeadline($str)
-  {
-    $nStr = $this->explodeNoEmpty(" ", str_replace(array(".", ",", "om ej annat anges", "Samtliga"), "", $str));
-    $club = "";
-    foreach($nStr as $name) {      
-      if ($this->whitelistedClub($name))
-        $club .= " $name";
-      else if ($club != "")
-        break;
-    }
-    return $club == "" ? false : $club;
+  {    
+    if (preg_match("/(Sa?mt?lin?ga|Båda)\s+(.+)/i", $str, $match) == 1) {
+      return trim(str_replace(array("om ej annat anges", "."), "", $match[2]));
+    }    
+    return false;
   }
   
   private function explodeNoEmpty($del, $str)
@@ -315,13 +431,5 @@ class Parse extends CI_Controller
       }
     }
     return false;
-  }
-  
-  private function toDate($dayMonth) 
-  {
-    $dm = explode(".",$dayMonth);
-    $date = sprintf("%02d", $dm[0]);
-    $month = sprintf("%02d", $dm[1]);
-    return "{$this->year}-$month-$date";
   }
 }
