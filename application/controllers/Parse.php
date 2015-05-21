@@ -9,8 +9,7 @@ class Parse extends CI_Controller
   private $whitelistTable = 'club_whitelist';
   private $year = 0;
   private $poulateWhitelist = false; 
-  private $clubRej = array();
-  
+  private $clubRej = array();  
   private $errorMen = array(
     "!" => "",
     "§" => "",
@@ -23,10 +22,9 @@ class Parse extends CI_Controller
     "1.,744" => "1744",
     "92703" => "92 703",
     "4777" => "477"
-  );
-  
+  );  
   private $errorWomen = array(
-    "Wedevåg (2.3" => "Wedevåg 23",
+    "2-.087" => "2087",
     "1.420.l" => "1420",
     "\t" => " ",
     "!" => "",
@@ -36,6 +34,18 @@ class Parse extends CI_Controller
     "Sandin 912" => "Sandin 92",
     "HjelmHuddinge" => "Hjelm Huddinge",
     "4270" => "427"
+  );
+  private $errorGender = array(
+    "M: Sofia " => "K: Sofia ",
+    "M: Marie " => "K: Marie ",
+    "M: Anna " => "K: Anna ",
+    "M: Maria " => "K: Maria ",
+    "K: Martin " => "M: Martin ",
+    "K: Lars " => "M: Lars ",
+    "M A: " => "M: ",
+    "M B: " => ",",
+    "K A: " => "K: ",
+    "K B: " => ","
   );
   
   public function create($tableName = 'results', $start = '2001', $end = '2014')
@@ -115,15 +125,12 @@ class Parse extends CI_Controller
     foreach($item->childNodes as $child)
       if ($all_club = $this->getClubFromHeadline(trim($child->textContent)))
         break;
-    $item->removeChild($resHeadline = $item->getElementsByTagName('span')->item(0));    
+    $item->removeChild($resHeadline = $item->getElementsByTagName('span')->item(0));
     $headline = $this->extractHeadline($resHeadline->textContent, $all_club);    
     
-    // Catch Critical known input errors (or irregularities)  
-    $str = str_replace(
-      array("M: Sofia ", "M: Marie", "M: Anna ", "M: Maria ", "K: Martin "), 
-      array("K: Sofia ", "K: Marie", "K: Anna ", "K: Maria ", "M: Martin "),
-      $item->textContent
-    );
+    // Catch Critical known input errors (or irregularities) 
+    $str = str_replace(array_keys($this->errorGender), $this->errorGender, $item->textContent);
+    
     // capture common input errors    
     $this->str_replace_patterns($str);
     
@@ -140,36 +147,18 @@ class Parse extends CI_Controller
       $women = $this->extractResults($str, "/K\s*\"fel hand\"\s*:\s*(.+)/i");
       $women = $this->extractResults($str, "/K\s*:\s*(.+)/i").",$women";  
     }
-    
     // Catch known input errors (or irregularities)
-    /*
-    $err = array("!", "§", "\t", ". ", "700m", "81256", "(1348  7166  3690  5307", "1.2476", "1.,744", "92703", "4777");
-    $cor = array("", "", " ", ", ", "700,", "(1256", "(1348  7166  3690  5307)", "1.247", "1744", "92 703", "477");    
-    $mRes = str_replace(".", "", $this->explodeNoEmpty(",", str_replace($err, $cor, $men)));
-    */
-    if (strpos($women, "89 Wedevåg"))
-      echo "$women<br/>";
-    
-    $mRes = $this->explodeNoEmpty(",", strtr(strtr($men, $this->errorMen), array("." => ""))); 
-    $wRes = $this->explodeNoEmpty(",", strtr(strtr($women, $this->errorWomen), array("." => ""))); 
-    /*
-    $err = array("Wedevåg \(2", "1.420.l", "\t", "!", ". ", "(1173  2653  4343  2073", ")1108", "Sandin 912", "HjelmHuddinge", "4270");
-    $cor = array("Wedevåg 2","1420", " ", "", ", ", "(1173  2653  4343  2073)", "(1108", "Sandin 92", "Hjelm Huddinge", "427");
-    $wRes = str_replace(".", "", $this->explodeNoEmpty(",", str_replace($err, $cor, $women)));
-    */
-    
-    
+    // Remove all '.' characters (must be done in this order).
+    // strtr is much slower 
+    $mRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorMen), $this->errorMen, $men))); 
+    $wRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorWomen), $this->errorWomen, $women)));
     $results = array();
-    if ($men) {
-      foreach($mRes as $record) {
+    if ($men)
+      foreach($mRes as $record)
         array_push($results, $this->wrapRecord($this->parseRecord($record), 1, $headline));
-      }
-    }
-    if ($women) {
-      foreach($wRes as $record) {
+    if ($women)
+      foreach($wRes as $record)
         array_push($results, $this->wrapRecord($this->parseRecord($record), 0, $headline));
-      }
-    }
     $this->addRecords($table, $results);
   }
   
@@ -259,28 +248,23 @@ class Parse extends CI_Controller
     return $res;
   }
   
+  // REWRITE TO PREG_REPLACE
   private function str_replace_patterns(&$str)
-  {
-    while (preg_match("/\d,\d{3}/", $str, $match) == 1) {
-      //echo "$str<br/>";
-      $str = str_replace($match[0], substr_replace($match[0], "", 1, 1), $str);    
-    }
-    while (preg_match("/(\s|^)\d\)\s/", $str, $match) == 1) {
-      //echo "$str<br/>";
-      $str = str_replace($match[0], " ", $str);
-    }
-    while (preg_match("/(\d\.\d{3})\d/", $str, $match) == 1) {
-      //echo "$str<br/>";
-      $str = str_replace($match[0], $match[1], $str);      
-    }
-    while (preg_match("/(\d{2})(\d\.\d{3})/", $str, $match) == 1) {
-      //echo "$str<br/>";
-      $str = str_replace($match[0], $match[1]." ".$match[2], $str);
-    }
-    while (preg_match("/([^\s\d])(\d\.\d{3})/", $str, $match) == 1) {
-      //echo "$str<br/>";
-      $str = str_replace($match[0], $match[1]." ".$match[2], $str);      
-    }
+  {    
+    $replacements = array(
+      "/(\d),(\d{3})/" => "$1$2",
+      "/(\s|^)\d\)\s/" => " ",
+      "/(\d\.\d{3})\d/" => "$1",
+      "/(\d{2})(\d\.\d{3})/" => "$1 $2",
+      "/([^\s\d])(\d\.\d{3})/" => "$1 $2",      
+      "/Anm:.*/" => "",
+      "/(\((\d{3,4}\s*){4})[^\d\)]/" => "$1)$3, ",
+      "/\(([^\(\)]+\()/" => "$1"
+    );
+    $count = 0;
+    $str = preg_replace(array_keys($replacements), $replacements, $str, -1, $count);
+    if ($count > 0)
+      echo "$str<br/><br/>";
     while (preg_match("/Dag \d(.*)Dag \d(.*)/i", $str, $match) == 1) {
       //echo "$str<br/>";
       $men = "";

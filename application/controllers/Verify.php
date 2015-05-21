@@ -11,7 +11,7 @@ class Verify extends CI_Controller
     
     $cnt = 0;
     $this->load->database(); 
-    $res = $this->db->query("SELECT old.* FROM `stats` old LEFT JOIN `results` new ON new.name LIKE CONCAT(old.name,'%') AND old.date = new.date AND old.score = new.score WHERE new.id IS NULL AND old.date > '1997-01-01'");  
+    $res = $this->db->query("SELECT old.* FROM `stats` old LEFT JOIN `results` new ON new.name LIKE CONCAT(old.name,'%') AND old.date = new.date AND old.score = new.score WHERE new.id IS NULL AND old.date > '1997-01-01' ORDER BY old.date DESC");  
     $match = $this->findPossibleMatches($res->result());
     $cols = array("name", "score", "date");
     $colsMatch = array("name", "score", "date");
