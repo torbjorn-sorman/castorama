@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Stats extends CI_Controller 
 {
+  private $table = "results";
   public function index()
   {
     header('Access-Control-Allow-Origin: *');
@@ -24,7 +25,7 @@ class Stats extends CI_Controller
     header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
     
     $this->load->database();
-    $query = $this->db->get_where('stats', array('id =' => $id), 1, 0);
+    $query = $this->db->get_where($this->table, array('id =' => $id), 1, 0);
     echo json_encode($query->result());
   }
   
@@ -45,7 +46,7 @@ class Stats extends CI_Controller
       $cond['club LIKE'] = "%".$input->club."%";        
     
     $this->db->order_by($input->orderby, $input->orderbydir);
-    $query = $this->db->get_where('stats', $cond, $input->limit, $input->offset);
+    $query = $this->db->get_where($this->table, $cond, $input->limit, $input->offset);
     echo json_encode($query->result());
   }  
 }

@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'futurablack';
+    src: url('fonts/futura_black-webfont.eot');
+    src: url('fonts/futura_black-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/futura_black-webfont.woff2') format('woff2'), url('fonts/futura_black-webfont.woff') format('woff'), url('fonts/futura_black-webfont.ttf') format('truetype'), url('fonts/futura_black-webfont.svg#futurablack') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+img {
+    border: 0px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.small-icon {
+    width: 16px;
+    height: 16px;
+}
+
+#topbar {
+    margin-bottom: 10px;
+}
+
+#bottombar {
+    margin-top: 10px;
+}
+
+.castorama-font {
+    font-family: "futurablack";
+}
