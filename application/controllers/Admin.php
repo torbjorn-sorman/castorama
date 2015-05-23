@@ -1,5 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-      class Main extends MY_Controller
+      class Admin extends MY_Controller
       {  
           function __construct()
           {
@@ -9,8 +9,13 @@
           } 
           
           function index()
-          {         
-              $this->load->view('main', $this->data);
+          {     
+              if($this->loggedIn()) {    
+                  $this->load->view('admin', $this->data);
+              } else {
+                  $this->load->helper('form');
+                  $this->load->view('login');
+              }
           }  
       }
 ?>

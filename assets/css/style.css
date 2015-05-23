@@ -10,6 +10,28 @@ img {
     border: 0px;
 }
 
+button {
+    font-size: 50px;
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+}
+
+button:active {
+    color: rgb(0, 148, 255);
+}
+
+.button-small {
+    font-size: 12px;
+}
+
+button .selected {
+    color: blue;
+}
+
 .icon {
     width: 32px;
     height: 32px;
@@ -22,14 +44,21 @@ img {
     height: 16px;
 }
 
+.admin-background {
+    background-color: aliceblue;
+    padding: 10px;
+}
+
 #topbar {
     margin-bottom: 10px;
 }
 
 #bottombar {
     margin-top: 10px;
+    font-size: 11px;
 }
 
 .castorama-font {
     font-family: "futurablack";
+    font-size: 60px;
 }

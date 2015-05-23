@@ -15,7 +15,13 @@
     <div id="topbar">
         <h1 class="castorama-font">CASTORAMA.SE</h1>
         <button class="ion-calculator" ng-click="navigate('home')"></button>
-        <button class="ion-stats-bars" ng-click="navigate('stats')"></button>
-        <button class="ion-gear-a" ng-click="navigate('admin')"></button>
+        <button class="ion-stats-bars" ng-click="navigate('stats')"></button>        
     </div>
     <div ng-view></div>
+    <div id="bottombar">
+        <em>Allt statistikmaterial tillh&ouml;r Svenska Friidrottsf&ouml;rbundet.</em>
+        <br />
+        <button class="button-small ion-wand" ng-click="navigate('admin')"></button>
+    </div>
+</body>
+</html>

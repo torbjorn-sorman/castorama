@@ -1,5 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-      class Main extends MY_Controller
+      class Home extends MY_Controller
       {  
           function __construct()
           {
@@ -10,7 +10,7 @@
           
           function index()
           {         
-              $this->load->view('main', $this->data);
+              $this->load->view('home', $this->data);              
           }  
       }
 ?>
