@@ -4,4 +4,5 @@
         <li>Create</li>
         <li>Verify</li>
     </ul>
+    <button class="ion-log-out" ng-click="logout()"></button>
 </div>

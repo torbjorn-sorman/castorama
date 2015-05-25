@@ -4,32 +4,7 @@
 // 2015-04-20
 ////////////////////
 
-var app = angular.module('castorama', ['ngRoute']);
-
-// Main Controller
-app.controller('MainController', function ($scope, $route, $routeParams, $location) {
-    $scope.$route = $route;
-    $scope.$location = $location;
-    $scope.$routeParams = $routeParams;
-    $scope.navigate = function (path) {
-        $location.path(path);
-    };
-});
-
-// Home Controller
-app.controller('HomeController', function ($scope, $routeParams) {
-    console.log("HomeController");
-});
-
-// Games Controller
-app.controller('StatsController', function ($scope, $http, $routeParams) {
-    console.log("StatsController");
-});
-
-// Report Controller
-app.controller('AdminController', function ($scope, $http) {
-    console.log("AdminController");
-});
+var app = angular.module('castorama', ['ngRoute', 'castorama.services', 'castorama.controllers']);
 
 // App Configurations
 app.config(function ($routeProvider, $locationProvider) {
@@ -48,6 +23,10 @@ app.config(function ($routeProvider, $locationProvider) {
     })
     .when('/admin', {
         templateUrl: '/admin',
+        controller: 'AdminController'
+    })
+    .when('/logout', {
+        templateUrl: '/logout',
         controller: 'AdminController'
     });
 });

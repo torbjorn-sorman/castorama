@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Parse extends CI_Controller 
+class Parser extends MY_Controller 
 {
     private $cntM = 0;
     private $cntW = 0;
@@ -9,7 +9,8 @@ class Parse extends CI_Controller
     private $whitelistTable = 'club_whitelist';
     private $year = 0;
     private $poulateWhitelist = false; 
-    private $clubRej = array();  
+    private $clubRej = array();
+    
     private $errorMen = array(
       "!" => "",
       "§" => "",
@@ -48,10 +49,44 @@ class Parse extends CI_Controller
       "K B: " => ","
     );
     
+    public function index()
+    {
+        if ($this->loggedIn())
+            $this->load->view('parser');        
+    }
+    
+    public function update($year = 2014)
+    {
+        if (!$this->loggedIn())
+            return;
+        $v = intval($year);
+        if (!(is_numeric($v) && $v > 2000))
+            return;
+        
+        $this->load->dbutil();
+        $this->load->dbforge();
+        $tableName = "results";
+        $this->checkDB($tableName);
+        
+        $this->year = $year;
+        $doc = new DOMDocument();
+        @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
+        $list = $doc->getElementById('marginal')->getElementsByTagName('p');
+        foreach($list as $item) {
+            $this->parseItem($doc, $item, $tableName);
+        }
+        
+        echo json_encode(array(
+            "posts" =>  array(
+                "men" => $this->cntM,
+                "women" => $this->cntW)));
+    }
+    
     public function create($tableName = 'results', $start = '2001', $end = '2014')
     {
-        if ($tableName == 'stats')
+        if (!$this->loggedIn())
             return;
+        
         $v = intval($start);
         $ve = intval($end);
         if (!(is_numeric($v) && $v > 2000 && is_numeric($ve) && $ve >= $v)) {
@@ -80,6 +115,27 @@ class Parse extends CI_Controller
             $this->dbforge->create_table($this->whitelistTable);
             $this->db->query("ALTER TABLE `{$this->whitelistTable}` ADD UNIQUE INDEX (`partial_name`)");
         }
+        $this->checkDB($tableName);
+        
+        foreach(range(intval($start), intval($end), 1) as $year) {
+            $this->year = $year;
+            $doc = new DOMDocument();
+            @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
+            $list = $doc->getElementById('marginal')->getElementsByTagName('p');
+            foreach($list as $item) {
+                $this->parseItem($doc, $item, $tableName);
+            }
+        }
+        echo "<p>Rejected club names (should be names or part of names):</p><ul>";
+        foreach($this->clubRej as $r)
+            echo "<li>$r</li>";
+        echo "</ul>";
+        print "<br/>M:{$this->cntM} W:{$this->cntW}<br>";
+        
+        print sprintf("%.2f",(microtime(TRUE)-$time)). ' seconds and '. (memory_get_usage()-$memory). ' bytes';
+    }
+    
+    private function checkDB($tableName) {
         if (!$this->db->table_exists($tableName)) {
             $this->dbforge->add_field('id');
             $this->dbforge->add_field(array(
@@ -100,22 +156,6 @@ class Parse extends CI_Controller
             $this->db->query("ALTER TABLE `$tableName` ADD UNIQUE INDEX (`key`)");
         }
         
-        foreach(range(intval($start), intval($end), 1) as $year) {
-            $this->year = $year;
-            $doc = new DOMDocument();
-            @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
-            $list = $doc->getElementById('marginal')->getElementsByTagName('p');
-            foreach($list as $item) {
-                $this->parseItem($doc, $item, $tableName);
-            }
-        }
-        echo "<p>Rejected club names (should be names or part of names):</p><ul>";
-        foreach($this->clubRej as $r)
-            echo "<li>$r</li>";
-        echo "</ul>";
-        print "<br/>M:{$this->cntM} W:{$this->cntW}<br>";
-        
-        print sprintf("%.2f",(microtime(TRUE)-$time)). ' seconds and '. (memory_get_usage()-$memory). ' bytes';
     }
     
     private function parseItem($doc, $item, $table) {
@@ -153,13 +193,51 @@ class Parse extends CI_Controller
         $mRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorMen), $this->errorMen, $men))); 
         $wRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorWomen), $this->errorWomen, $women)));
         $results = array();
+        
+        $keys = $this->getKeys($table, $this->year);                
         if ($men)
-            foreach($mRes as $record)
-                array_push($results, $this->wrapRecord($this->parseRecord($record), 1, $headline));
+            $this->push_if_new($results, $keys, 1, $mRes, $headline);
+        if ($women)
+            $this->push_if_new($results, $keys, 0, $wRes, $headline);
+        /*
+        if ($men) {
+            foreach($mRes as $record) {   
+                $post = $this->wrapRecord($this->parseRecord($record), 1, $headline);
+                if ($keys[$post['key']])
+                    array_push($results, $post);
+            }
+        }
         if ($women)
             foreach($wRes as $record)
                 array_push($results, $this->wrapRecord($this->parseRecord($record), 0, $headline));
+         * */
         $this->addRecords($table, $results);
+        return true;
+    }
+    
+    private function push_if_new(&$results, $keys, $sex, $list, $headline) {
+        foreach($list as $record) {   
+            $post = $this->wrapRecord($this->parseRecord($record), $sex, $headline);
+            if (count(array_keys($post)) != 12 || $keys[$post['key']])
+                continue;
+            array_push($results, $post);
+        }
+    }
+    
+    private function getKeys($table, $year) {        
+        $interval = $year + 1;
+        $this->db->select('key');
+		$this->db->from($table);
+		$this->db->where("date > $year-01-01");
+        $this->db->where("date < $interval-01-01");
+        $res = $this->db->get();
+        if ($res->num_rows() > 0) {
+            $result = array();
+            foreach($res->result() as $row)
+                $result[$row->key] = true;
+            return $result;
+        }
+        return array();
     }
     
     private function wrapRecord($rec, $sex, $head)
@@ -184,7 +262,6 @@ class Parse extends CI_Controller
     private function parseRecord($str)
     { 
         echo "$str<br/>";
-        $strcpy = substr($str, 0);
         $eventRes = $this->extractParenthesis($str);    
         $nStr = $this->explodeNoEmpty(" ", trim($str));    
         $score = array_pop($nStr);
@@ -222,7 +299,6 @@ class Parse extends CI_Controller
     
     private function extractResults(&$str, $pattern)
     {
-        $res = array();
         if (preg_match($pattern, $str, $match) == 1) { 
             $str = str_replace($match[0], "", $str);      
             return $match[1];
@@ -270,7 +346,7 @@ class Parse extends CI_Controller
             //echo "$str<br/>";
             $men = "";
             $women = "";
-            $w; $m;
+            //$w; $m;
             if (preg_match("/(K:.+)$/", $match[1], $w) == 1) {
                 $women = $w[1]; 
                 if (preg_match("/(M:.+)$/", str_replace($w[0], "", $match[1]), $m) == 1) {
@@ -338,6 +414,7 @@ class Parse extends CI_Controller
             }
             return true;
         }
+        return true;
     }
     
     private function addRecords($table, $res) 
@@ -359,7 +436,7 @@ class Parse extends CI_Controller
                     $sql .= ",(".$this->iterValues($res[$i]).")";
             }
         }
-        $sql .= ";";
+        $sql .= ";";        
         $this->db->query($sql);
         return true;
     }

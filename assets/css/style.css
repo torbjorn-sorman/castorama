@@ -53,9 +53,14 @@ button .selected {
     margin-bottom: 10px;
 }
 
-#bottombar {
-    margin-top: 10px;
+#bottombar {    
     font-size: 11px;
+    position: fixed;
+    z-index: 100; 
+    bottom: 0; 
+    left: 0;
+    width: 100%;
+    padding: 5px;
 }
 
 .castorama-font {

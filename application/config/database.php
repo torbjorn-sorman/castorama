@@ -57,17 +57,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 | The $query_builder variables lets you determine whether or not to load
 | the query builder class.
-*/
+ */
 
 $active_group = 'default';
 $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
+    'hostname' => 'newsnetwork.c2b4q34uqc1h.eu-west-1.rds.amazonaws.com',
+    'username' => 'Nicklas',
+    'password' => 'stikoper10',
+    'database' => 'castorama',
+    /*
 	'hostname' => 'castorama-134317.mysql.binero.se',
 	'username' => '134317_cz28467',
 	'password' => 'casto1986',
 	'database' => '134317-castorama',
+     */
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
