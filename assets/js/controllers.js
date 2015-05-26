@@ -1,32 +1,35 @@
 ﻿angular.module('castorama.controllers', [])
 
-// Main Controller
-.controller('MainController', function ($scope, $route, $routeParams, $location, User) {
-    $scope.$route = $route;
-    $scope.$location = $location;
-    $scope.$routeParams = $routeParams;
+.controller('MainController', function ($scope, $location, User) {
     $scope.navigate = function (path) {
         $location.path(path);
     };
-    $scope.status = User.status;
     $scope.logout = function () {
         User.logout(function (data) { if (data) $location.path('home'); });
     };
+    $scope.status = User.status;
     User.refresh();
 })
 
-// Home Controller
-.controller('HomeController', function ($scope, $routeParams) {
-    console.log("HomeController");
+.controller('HomeController', function ($scope, ScoreTable) {
+    $scope.castorama = new Castorama(ScoreTable);
+    $scope.genderSelect = function (gen) {
+        $scope.castorama.gender.toggle = (gen == 'men');
+    }
 })
 
-// Games Controller
-.controller('StatsController', function ($scope, $http, $routeParams) {
+.controller('StatsController', function ($scope) {
     console.log("StatsController");
 })
 
-// Report Controller
-.controller('AdminController', function ($scope, $location, $route, User) {
+.controller('ParserController', function ($scope) {
+    $scope.options = { year: 2001 };
+    $scope.updateDB = function (options) {
+        console.log(options);
+    }
+})
+
+.controller('AdminController', function ($scope, $location, User) {
     console.log("AdminController");
     $scope.login = { username: 'tb', password: 'cooling' };
     $scope.verifyLogin = function (login) {

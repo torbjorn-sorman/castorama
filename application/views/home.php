@@ -1,5 +1,24 @@
-<div>
-  <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-  </p>
+<div class="row">
+    <div class="col col-25 col-offset-25">
+        <button class="button button-icon button-gender ion-man {{ castorama.gender.toggle ? 'selected' : '' }}" ng-click="genderSelect('men')"></button>
+    </div>
+    <div class="col col-25">
+        <button class="button button-icon button-gender ion-woman {{ !castorama.gender.toggle ? 'selected' : '' }}" ng-click="genderSelect('women')"></button>
+    </div>
+</div>
+<div class="row" ng-repeat="e in ['shot', 'javelin', 'discus', 'hammer']">
+    <div class="col col-25">
+        <img class="event-icon" ng-src="{{castorama.events[e].name}}" />
+    </div>
+    <div class="col col-33 style-5">
+        <input type="number" ng-model="castorama.events[e].result" step="1" placeholder="(cm)" />
+    </div>
+    <div class="col col-33 col-offset-10 number-display">
+        {{castorama.events[e].score}}
+    </div>
+</div>
+<div class="row">
+    <div class="col col-25"></div>
+    <div class="col col-33"></div>
+    <div class="col col-33 col-offset-10 number-display">{{castorama.sum.value}}</div>
 </div>

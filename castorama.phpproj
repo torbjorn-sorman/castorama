@@ -61,7 +61,6 @@
     <Compile Include="application\models\index.html" />
     <Compile Include="application\models\User.php" />
     <Compile Include="application\third_party\index.html" />
-    <Compile Include="application\views\admin.php" />
     <Compile Include="application\views\errors\cli\error_404.php" />
     <Compile Include="application\views\errors\cli\error_db.php" />
     <Compile Include="application\views\errors\cli\error_exception.php" />
@@ -500,6 +499,8 @@
     <Folder Include="assets\" />
     <Folder Include="assets\css\" />
     <Folder Include="assets\css\fonts\" />
+    <Folder Include="assets\img\" />
+    <Folder Include="assets\img\events\" />
     <Folder Include="assets\js\" />
     <Folder Include="assets\js\angular\" />
     <Folder Include="assets\js\data\" />
@@ -572,6 +573,14 @@
     <Content Include="assets\css\fonts\ionicons.woff" />
     <Content Include="assets\css\ionicons.css" />
     <Content Include="assets\css\style.css" />
+    <Content Include="assets\img\events\discus.png" />
+    <Content Include="assets\img\events\hammer.png" />
+    <Content Include="assets\img\events\javelin.png" />
+    <Content Include="assets\img\events\shot.png" />
+    <Content Include="assets\img\female.png" />
+    <Content Include="assets\img\ionic.png" />
+    <Content Include="assets\img\male.png" />
+    <Content Include="assets\img\unisex.png" />
     <Content Include="assets\js\angular\angular-route.js" />
     <Content Include="assets\js\angular\angular.js" />
     <Content Include="assets\js\app.js" />
@@ -584,6 +593,7 @@
     <Content Include="assets\js\data\score_table\women\hammer.json" />
     <Content Include="assets\js\data\score_table\women\javelin.json" />
     <Content Include="assets\js\data\score_table\women\shot.json" />
+    <Content Include="assets\js\filters.js" />
     <Content Include="assets\js\models\castorama.js" />
     <Content Include="assets\js\services.js" />
     <Content Include="assets\svg\add-to-list.svg" />

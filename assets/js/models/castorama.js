@@ -39,7 +39,7 @@ function Sum() {
           var val = parseInt(events[e].score);
           total += isNaN(val) ? 0 : val;
         }
-        return isNaN(total) || total < 1 ? "" : total;
+        return isNaN(total) || total < 1 ? 0 : total;
     });
 
     this.__defineGetter__("events", function () {
@@ -88,7 +88,7 @@ function Event(t, g, s, e, n) {
     var event = e;
     var name = n;
     if (n == '')
-        name = 'img/events/' + e + '.png';
+        name = 'assets/img/events/' + e + '.png';
     var gender = g;
     var sum = s;
 

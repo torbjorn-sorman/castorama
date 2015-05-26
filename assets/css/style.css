@@ -1,9 +1,38 @@
 @font-face {
+    font-family: 'DIN145136breit';
+    src: url('fonts/DIN145136breit.eot');
+    src: url('fonts/DIN145136breit.eot') format('embedded-opentype'), url('fonts/DIN145136breit.woff2') format('woff2'), url('fonts/DIN145136breit.woff') format('woff'), url('fonts/DIN145136breit.ttf') format('truetype'), url('fonts/DIN145136breit.svg#DIN145136breit') format('svg');
+}
+
+@font-face {
     font-family: 'futurablack';
     src: url('fonts/futura_black-webfont.eot');
     src: url('fonts/futura_black-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/futura_black-webfont.woff2') format('woff2'), url('fonts/futura_black-webfont.woff') format('woff'), url('fonts/futura_black-webfont.ttf') format('truetype'), url('fonts/futura_black-webfont.svg#futurablack') format('svg');
     font-weight: normal;
     font-style: normal;
+}
+
+.content {
+    background-color: aliceblue;
+    padding: 10px;
+    padding-left: 10%;
+}
+
+#topbar {
+    margin-bottom: 10px;
+    padding-left: 10%;
+}
+
+#bottombar {
+    background-color:bisque;   
+    font-size: 10px;
+    position:fixed;
+    z-index: 100; 
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    padding: 5px;
+    padding-left: 10%;
 }
 
 img {
@@ -20,6 +49,10 @@ button {
     outline:none;
 }
 
+button:hover {
+    color: rgba(0, 148, 255, 0.4);
+}
+
 button:active {
     color: rgb(0, 148, 255);
 }
@@ -32,6 +65,16 @@ button .selected {
     color: blue;
 }
 
+.selection-border {
+    border: 2px solid rgba(0,0,0,0.75);
+}
+
+.selected {
+    border: 2px solid rgba(0,0,0,0.75);
+    padding: 4px 14px;
+    border-radius: 30px;
+}
+
 .icon {
     width: 32px;
     height: 32px;
@@ -39,31 +82,51 @@ button .selected {
     margin-right: 5px;
 }
 
+.event-icon {
+    width: 42px;
+    height: 42px;    
+}
+
 .small-icon {
     width: 16px;
     height: 16px;
 }
 
-.admin-background {
-    background-color: aliceblue;
-    padding: 10px;
+.gender-icon {
+    height: 50px;
+    padding: 6px 16px;    
+    margin-left: auto;
+    margin-right: auto;
 }
 
-#topbar {
-    margin-bottom: 10px;
+.button-gender {
+    font-size: 50px;
+    padding: 6px 16px;
 }
 
-#bottombar {    
-    font-size: 11px;
-    position: fixed;
-    z-index: 100; 
-    bottom: 0; 
-    left: 0;
-    width: 100%;
-    padding: 5px;
+.castorama-font, .castorama-font-small {
+    font-family: "futurablack";
 }
 
 .castorama-font {
-    font-family: "futurablack";
     font-size: 60px;
+}
+
+.castorama-font-small {
+    font-size: 20px;
+}
+
+.number-display {
+    font-family: "DIN145136breit";
+    font-size: 28px;
+}
+
+.event-display {
+    float: right;
+    margin-right: 20%;
+}
+
+.event-display img {
+    width: 30px;
+    height: 30px;
 }

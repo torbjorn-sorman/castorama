@@ -28,8 +28,31 @@
     };
 })
 
+.factory('RecordTracker', function () {
+    var records = [];
+    var fetchRecord = function ($http, id, callback) {
+        $http.get('stats/get/' + id).success(function (data) {
+            records[id] = data[0];
+            callback(data[0]);
+            console.log(data[0]);
+        });
+    }
+    return {
+        set: function (record) {
+            records[record.id] = record;
+        },
+        get: function (id) {
+            if (!(id in records)) {
+                fetchRecord(arguments[1], id, arguments[2]);
+                return null;
+            }
+            return records[id];
+        }
+    };
+})
+
 .factory('ScoreTable', function ($http) {
-    var source = 'js/data/score_table/';
+    var source = 'assets/js/data/score_table/';
     var score_table = {
         men: {
             discus: null,
