@@ -69,8 +69,10 @@ class Parser extends MY_Controller
         $this->checkDB($tableName);
         
         $this->year = $year;
+        
         $doc = new DOMDocument();
-        @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
+        $doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));
+        
         $list = $doc->getElementById('marginal')->getElementsByTagName('p');
         foreach($list as $item) {
             $this->parseItem($doc, $item, $tableName);
@@ -218,7 +220,7 @@ class Parser extends MY_Controller
     private function push_if_new(&$results, $keys, $sex, $list, $headline) {
         foreach($list as $record) {   
             $post = $this->wrapRecord($this->parseRecord($record), $sex, $headline);
-            if (count(array_keys($post)) != 12 || $keys[$post['key']])
+            if (count(array_keys($post)) != 12 || isset($keys[$post['key']]))
                 continue;
             array_push($results, $post);
         }
@@ -228,8 +230,7 @@ class Parser extends MY_Controller
         $interval = $year + 1;
         $this->db->select('key');
 		$this->db->from($table);
-		$this->db->where("date > $year-01-01");
-        $this->db->where("date < $interval-01-01");
+		$this->db->where("date between '$year-01-01' and '$interval-01-01'");
         $res = $this->db->get();
         if ($res->num_rows() > 0) {
             $result = array();
@@ -261,7 +262,6 @@ class Parser extends MY_Controller
     // Pattern Name [Birth] [Club] Score [events]
     private function parseRecord($str)
     { 
-        echo "$str<br/>";
         $eventRes = $this->extractParenthesis($str);    
         $nStr = $this->explodeNoEmpty(" ", trim($str));    
         $score = array_pop($nStr);
@@ -340,10 +340,7 @@ class Parser extends MY_Controller
         );
         $count = 0;
         $str = preg_replace(array_keys($replacements), $replacements, $str, -1, $count);
-        if ($count > 0)
-            echo "$str<br/><br/>";
         while (preg_match("/Dag \d(.*)Dag \d(.*)/i", $str, $match) == 1) {
-            //echo "$str<br/>";
             $men = "";
             $women = "";
             //$w; $m;

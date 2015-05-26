@@ -1,5 +1,5 @@
-<h1>Administrering</h1>
-<form ng-if="!status.loggedin">
+<form ng-if="!status.loggedin" class="login-content">
+    <h1 class="admin-title"><span class="highlighted-text">Administrering</span></h1>
     <p>
         <input type="text" size="25" ng-model="login.username" placeholder="Anv&auml;ndarnamn" />
     </p>

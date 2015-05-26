@@ -6,9 +6,7 @@ class Stats extends CI_Controller
   private $table = "results";
   public function index()
   {
-    header('Access-Control-Allow-Origin: *');
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-    echo "<html>Stats.php</html>";
+      $this->load->view('stats');
   }
   
   public function view($text = 'text')

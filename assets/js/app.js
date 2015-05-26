@@ -10,27 +10,27 @@ var app = angular.module('castorama', ['ngRoute', 'castorama.services', 'castora
 app.config(function ($routeProvider, $locationProvider) {
     $routeProvider
     .when('/', {
-        templateUrl: '/home',
+        templateUrl: '/index.php/home',
         controller: 'HomeController'
     })
     .when('/home', {
-        templateUrl: '/home',
+        templateUrl: '/index.php/home',
         controller: 'HomeController'
     })
     .when('/stats', {
-        templateUrl: '/stats',
+        templateUrl: '/index.php/stats',
         controller: 'StatsController'
     })
     .when('/parser', {
-        templateUrl: '/parser',
+        templateUrl: '/index.php/parser',
         controller: 'ParserController'
     })
     .when('/admin', {
-        templateUrl: '/admin',
+        templateUrl: '/index.php/login',
         controller: 'AdminController'
     })
     .when('/logout', {
-        templateUrl: '/logout',
+        templateUrl: '/index.php/logout',
         controller: 'AdminController'
     });
 });

@@ -1,10 +1,10 @@
 ﻿angular.module('castorama.services', [])
 
 .factory('User', function ($http) {
-    var userStatus = new UserStatus();
+    var userStatus = new UserStatus();    
     return {
         login: function(login, callback) {
-            $http.post('/login/login/', login).success(function (data, status, headers, config) {
+            $http.post('/index.php/login/login/', login).success(function (data, status, headers, config) {
                 if (data) {
                     userStatus.loggedin = true;
                     userStatus.username = login.username;
@@ -13,15 +13,21 @@
             });
         },
         logout: function(callback) {
-            $http.get('/login/logout/').success(function (data, status, headers, config) {                
+            $http.get('/index.php/login/logout/').success(function (data, status, headers, config) {
                 if (data)
                     userStatus.loggedin = false;
                 callback(data);
             });
         },
         refresh: function() {
-            $http.get('/login/isloggedin/').success(function (data, status, headers, config) {                                
-                userStatus.loggedin = data ? true : false;
+            $http.get('/index.php/login/isloggedin/').success(function (data, status, headers, config) {
+                if (data) {
+                    userStatus.loggedin = true;
+                    userStatus.username = data;
+                } else {
+                    userStatus.loggedin = false;
+                    userStatus.username = "";
+                }
             });
         },
         status: userStatus
@@ -113,10 +119,10 @@
     };
 });
 
-function UserStatus() {
-    console.log("new user status!");
+function UserStatus() {    
     var loggedin = false;
     var username = "";
+    var nav = 0;
     this.__defineGetter__("loggedin", function () {
         return loggedin;
     });
@@ -128,5 +134,11 @@ function UserStatus() {
     });
     this.__defineSetter__("username", function (val) {
         username = val;
+    });
+    this.__defineGetter__("nav", function () {
+        return nav;
+    });
+    this.__defineSetter__("nav", function (val) {
+        nav = val;
     });
 }

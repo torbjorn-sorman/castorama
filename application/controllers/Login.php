@@ -45,7 +45,7 @@ class Login extends MY_Controller
     
     function isloggedin()
     {
-        echo $this->loggedIn();
+        echo $this->loggedIn() ? $this->session->userdata('logged_in')['username'] : false;
     }
 }
 

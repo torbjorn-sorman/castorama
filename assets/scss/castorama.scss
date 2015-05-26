@@ -1,0 +1,163 @@
+
+// Turquoise Blue
+$color-alpha: #57E6BB !default;
+// Mountain Meadow
+$color-beta: #14A57A !default;
+// Hippie Green
+$color-gamma: #4D764E !default;
+// Christi
+$color-delta: #64AE11 !default;
+// Atlantis
+$color-epsilon: #9DD72A !default;
+// Sulu
+$color-zeta: #C1EE5F !default;
+
+$footer-bar-height: 100px;
+$event-icon-size: 42px;
+
+// Include all of Ionic
+@import "home.scss";
+@import "button.scss";
+@import "../css/ionicons.css";
+
+@font-face {
+    font-family: 'DIN145136breit';
+    src: url('fonts/DIN145136breit.eot');
+    src: url('fonts/DIN145136breit.eot') format('embedded-opentype'), url('fonts/DIN145136breit.woff2') format('woff2'), url('fonts/DIN145136breit.woff') format('woff'), url('fonts/DIN145136breit.ttf') format('truetype'), url('fonts/DIN145136breit.svg#DIN145136breit') format('svg');
+}
+
+@font-face {
+    font-family: 'futurablack';
+    src: url('fonts/futura_black-webfont.eot');
+    src: url('fonts/futura_black-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/futura_black-webfont.woff2') format('woff2'), url('fonts/futura_black-webfont.woff') format('woff'), url('fonts/futura_black-webfont.ttf') format('truetype'), url('fonts/futura_black-webfont.svg#futurablack') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-color: $color-epsilon;
+    color: $color-delta;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#container {
+    min-height: 100%;
+    position: relative;
+}
+
+#header {
+    background-color: $color-alpha;
+    padding-left: 10%;
+    padding-top: 3%;
+    padding-bottom: 1%;
+}
+
+#content {
+    background-color: $color-beta;
+    padding: 10px;
+    padding-left: 10%;
+    padding-right: 10%;
+    min-height: 400px;
+    padding-bottom: $footer-bar-height + 30px;
+}
+
+#footer {
+    position: absolute;
+    width: 100%;
+    height: $footer-bar-height;
+    bottom: 0px;
+    left: 0px;
+    background-color: $color-zeta;
+    font-size: 10px;
+    padding: 5px;
+    padding-left: 10%;
+    padding-top: 1%;
+}
+
+img {
+    border: 0px;
+}
+
+.selection-border {
+    border: 2px solid $color-alpha;
+}
+
+.selected {
+    border: 2px solid $color-alpha;
+    padding: 4px 14px;
+    border-radius: 30px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.event-icon {
+    width: $event-icon-size;
+    height: $event-icon-size;
+}
+
+.small-icon {
+    width: $event-icon-size / 2;
+    height: $event-icon-size / 2;
+}
+
+.castorama-font, .castorama-font-small {
+    font-family: "futurablack";
+}
+
+.castorama-font {
+    font-size: 60px;
+}
+
+.castorama-font-small {
+    font-size: 20px;
+}
+
+.number-display {
+    font-family: "DIN145136breit";
+    font-size: 28px;
+    color: $color-epsilon;
+}
+
+.event-display {
+    float: right;
+    margin-right: 20%;
+}
+
+.event-display img {
+    width: 30px;
+    height: 30px;
+}
+
+input[type="text"], input[type="number"], input[type="password"] , input[type="submit"] {
+    display: block;
+    margin: auto;
+    width: 80%;
+    height: 40px;
+    //font-family: "Open Sans", sans-serif;
+    font-size: 28px;
+    padding: 5px;
+    appearance: none;
+    box-shadow: none;
+    border-radius:10px;
+}
+
+.admin-title {    
+    margin: auto;
+    width: 80%;
+    height: 40px;
+    padding: 5px;
+}
+
+.login-content {    
+    padding-right: 20%;
+    width: 400px;
+    height: 200px;
+}
