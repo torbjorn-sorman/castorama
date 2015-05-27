@@ -7,6 +7,6 @@
     <PHPDebugging>True</PHPDebugging>
     <JsDebugging>False</JsDebugging>
     <SilverlightDebugging>False</SilverlightDebugging>
-    <ProjectView>ShowAllFiles</ProjectView>
+    <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
 </Project>

@@ -1,0 +1,52 @@
+﻿// Turquoise Blue
+$color-alpha: #57E6BB !default;
+// Mountain Meadow
+$color-beta: #14A57A !default;
+// Hippie Green
+$color-gamma: #4D764E !default;
+// Christi
+$color-delta: #64AE11 !default;
+// Atlantis
+$color-epsilon: #9DD72A !default;
+// Sulu
+$color-zeta: #C1EE5F !default;
+
+body {
+    background-color: $color-epsilon;
+    color: $color-delta;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+    color: $color-alpha;
+    background-color: $color-gamma;
+    border-radius:5px;
+    padding: 5px;
+}
+
+h2 {
+    color: $color-zeta;
+    background-color: $color-beta;
+    border-radius:4px;
+    padding: 4px;
+}
+
+img {
+    border: 0px;
+}
+
+input[type="text"], input[type="number"], input[type="password"] , input[type="submit"] {
+    display: block;
+    margin: auto;
+    width: 80%;
+    height: 40px;
+    font-size: 28px;
+    padding: 5px;
+    appearance: none;
+    box-shadow: none;
+    border-radius:10px;
+}

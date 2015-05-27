@@ -13,6 +13,8 @@
     <script type="text/javascript" src="/assets/js/app.js"></script>
     <script type="text/javascript" src="/assets/js/models/castorama.js"></script>
 
+    <script type="text/javascript" src="/assets/js/ext/ng-infinite-scroll.js"></script>
+
     <link rel="stylesheet" type="text/css" href="/assets/css/castorama.css" />
 
 </head>
@@ -22,7 +24,8 @@
             <h1 class="castorama-font">CASTORAMA.SE</h1>
             <button class="{{navClass(0)}} ion-calculator" ng-click="navigate('home', 0)"> Ber&auml;kna</button>
             <button class="{{navClass(1)}} ion-stats-bars" ng-click="navigate('stats', 1)"> Statistik</button>
-            <button class="{{navClass(2)}} ion-soup-can" ng-click="navigate('parser', 2)" ng-if="status.loggedin"> Databas</button>
+            <button class="{{navClass(2)}} ion-trophy" ng-click="navigate('season', 2)"> &Aring;rets</button>
+            <button class="{{navClass(3)}} ion-soup-can" ng-click="navigate('parser', 3)" ng-if="status.loggedin"> Databas</button>
             <button class="button-navigation ion-log-out" ng-click="logout()" ng-if="status.loggedin"> Logga ut</button>
         </div>
         <div id="content" ng-view></div>

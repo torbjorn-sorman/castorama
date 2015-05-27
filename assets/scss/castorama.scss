@@ -16,6 +16,7 @@ $footer-bar-height: 100px;
 $event-icon-size: 42px;
 
 // Include all of Ionic
+@import "default.scss";
 @import "home.scss";
 @import "button.scss";
 @import "../css/ionicons.css";
@@ -34,15 +35,6 @@ $event-icon-size: 42px;
     font-style: normal;
 }
 
-body {
-    background-color: $color-epsilon;
-    color: $color-delta;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
 #container {
     min-height: 100%;
     position: relative;
@@ -51,6 +43,7 @@ body {
 #header {
     background-color: $color-alpha;
     padding-left: 10%;
+    padding-right: 10%;
     padding-top: 3%;
     padding-bottom: 1%;
 }
@@ -66,19 +59,57 @@ body {
 
 #footer {
     position: absolute;
-    width: 100%;
     height: $footer-bar-height;
     bottom: 0px;
     left: 0px;
+    width: 100%;
     background-color: $color-zeta;
     font-size: 10px;
     padding: 5px;
     padding-left: 10%;
+    padding-right: 10%;
     padding-top: 1%;
 }
 
-img {
-    border: 0px;
+.drop-down {
+    position: relative;
+    width: 100%;
+    height: 36px;
+    color: $color-alpha;
+    background-color: $color-gamma;
+    border-radius:5px;
+    padding: 5px;
+}
+
+.drop-down-title {
+    padding-left: 10px;
+    font-size: 26px;
+    font-weight: 600;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding-top: 10px;
+}
+
+.drop-down-toggle {
+    padding-right: 20px;
+    font-size: 36px;
+    position: absolute;
+    font-weight: 600;
+    top: 0px;
+    right: 0px;
+    padding-top: 5px;
+}
+
+.stats-table {
+    width: 100%;
+}
+
+.row-item {
+    color: white;
+}
+.row-header {
+    color: white;
 }
 
 .selection-border {
@@ -136,17 +167,8 @@ img {
     height: 30px;
 }
 
-input[type="text"], input[type="number"], input[type="password"] , input[type="submit"] {
-    display: block;
-    margin: auto;
-    width: 80%;
-    height: 40px;
-    //font-family: "Open Sans", sans-serif;
-    font-size: 28px;
-    padding: 5px;
-    appearance: none;
-    box-shadow: none;
-    border-radius:10px;
+.stats-search {
+    width: 50%;
 }
 
 .admin-title {    
@@ -162,14 +184,22 @@ input[type="text"], input[type="number"], input[type="password"] , input[type="s
     height: 200px;
 }
 
+.highlighted-text {
+    color: $color-alpha;
+    background-color: $color-gamma;
+    border-radius:5px;
+    padding: 5px;
+}
+
 .loading-spinner {
   width: 126px;
   height: 126px;
-  margin: auto;
+  margin: 20px;
   background: url('../img/spiffygif_126x126.png') top;
-  animation: play .8s steps(18) infinite;
+  background-repeat: no-repeat;
+  animation: play 1s steps(18) infinite;
 }
 
 @keyframes play {
-    100% { background-position: left bottom; }
+    100% { background-position: bottom; }
 }

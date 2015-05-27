@@ -21,6 +21,10 @@ app.config(function ($routeProvider, $locationProvider) {
         templateUrl: '/index.php/stats',
         controller: 'StatsController'
     })
+    .when('/season', {
+        templateUrl: '/index.php/season',
+        controller: 'SeasonController'
+    })
     .when('/parser', {
         templateUrl: '/index.php/parser',
         controller: 'ParserController'

@@ -40,7 +40,9 @@
     <Compile Include="application\config\smileys.php" />
     <Compile Include="application\config\user_agents.php" />
     <Compile Include="application\controllers\data\club_whitelist.php" />
+    <Compile Include="application\controllers\data\club_no_compete.php" />
     <Compile Include="application\controllers\data\tables.php" />
+    <Compile Include="application\controllers\Season.php" />
     <Compile Include="application\controllers\Home.php" />
     <Compile Include="application\controllers\index.html" />
     <Compile Include="application\controllers\Login.php" />
@@ -80,6 +82,7 @@
     <Compile Include="application\.htaccess" />
     <Compile Include="application\index.html" />
     <Compile Include="application\views\needlogin.php" />
+    <Compile Include="application\views\season.php" />
     <Compile Include="application\views\stats.php" />
     <Compile Include="application\views\parser.php" />
     <Compile Include="system\core\compat\hash.php" />
@@ -508,6 +511,7 @@
     <Folder Include="assets\js\data\score_table\" />
     <Folder Include="assets\js\data\score_table\men\" />
     <Folder Include="assets\js\data\score_table\women\" />
+    <Folder Include="assets\js\ext\" />
     <Folder Include="assets\js\models\" />
     <Folder Include="assets\lib\" />
     <Folder Include="assets\lib\ionic\" />
@@ -604,7 +608,10 @@
     <Content Include="assets\js\data\score_table\women\hammer.json" />
     <Content Include="assets\js\data\score_table\women\javelin.json" />
     <Content Include="assets\js\data\score_table\women\shot.json" />
+    <Content Include="assets\js\ext\jquery-2.1.4.min.js" />
+    <Content Include="assets\js\ext\ng-infinite-scroll.js" />
     <Content Include="assets\js\filters.js" />
+    <Content Include="assets\js\ext\ng-infinite-scroll.min.js" />
     <Content Include="assets\js\models\castorama.js" />
     <Content Include="assets\js\services.js" />
     <Content Include="assets\lib\ionic\css\ionic.css" />
@@ -671,6 +678,7 @@
     <Content Include="assets\lib\ionic\version.json" />
     <Content Include="assets\scss\button.scss" />
     <Content Include="assets\scss\castorama.scss" />
+    <Content Include="assets\scss\default.scss" />
     <Content Include="assets\scss\home.scss" />
     <Content Include="assets\svg\add-to-list.svg" />
     <Content Include="assets\svg\add-user.svg" />

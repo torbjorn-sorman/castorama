@@ -8,7 +8,8 @@ class Parser extends MY_Controller
     private $url = "http://www.friidrott.se/rs/resultat.aspx";
     private $year = 0;
     private $clubRej = array();
-    private $whitelist;    
+    private $whitelist;  
+    private $removed = array();
     
     private $errorMen = array(
       "!" => "",
@@ -56,6 +57,20 @@ class Parser extends MY_Controller
             $this->load->view('needlogin');
     }
     
+    public function season($year = 2014) {
+        if (!$this->loggedIn()) {
+            $this->load->view('needlogin');
+            return;
+        }
+        
+        $nonCompete = "AUS|CAN|CYP|DEN|ESP|EST|FIN|FRA|GBR|GER|GRE|IRL|IRN|ISL|ISR|JAM|LAT|NOR|SRB|USA|USS";
+        $select = "SELECT name, max(score)";
+        $where = "WHERE date BETWEEN '$year-01-01' AND '".($year + 1)."-01-01' AND sex = 1 AND club NOT REGEXP '$nonCompete'";
+        $sql = "$select FROM results $where GROUP BY name ORDER BY score DESC;";
+        $query = $this->db->query($sql);
+        echo json_encode($query->result());
+    }
+    
     public function update($year = 2014)
     {
         if (!$this->loggedIn()) {
@@ -69,19 +84,25 @@ class Parser extends MY_Controller
         $this->load->dbutil();
         $this->loadWhitelist();
         $tableName = "results";
+        $this->removed = array();
         
         $this->year = $year;
         
         $doc = new DOMDocument();
         @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));        
         $list = $doc->getElementById('marginal')->getElementsByTagName('p');
+        
+        $keys = $this->getKeys($tableName, $this->year);
+        $validKeys = array();
         foreach($list as $item)
-            $this->parseItem($doc, $item, $tableName);
+            $this->parseItem($doc, $item, $tableName, $keys, $validKeys);        
+        $this->removeRows($tableName, $keys, $validKeys);
         
         echo json_encode(array(
             "posts" =>  array(
                 "men" => $this->cntM,
-                "women" => $this->cntW)));
+                "women" => $this->cntW,
+                "removed" => count($this->removed))));
     }
     
     public function create($tableName = 'results', $start = '2001', $end = '2014')
@@ -105,8 +126,11 @@ class Parser extends MY_Controller
             $doc = new DOMDocument();
             @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
             $list = $doc->getElementById('marginal')->getElementsByTagName('p');
+            $keys = $this->getKeys($tableName, $year);
+            $validKeys = array();
             foreach($list as $item)
-                $this->parseItem($doc, $item, $tableName);
+                $this->parseItem($doc, $item, $tableName, $keys, $validKeys);        
+            $this->removeRows($tableName, $keys, $validKeys);
         }
         echo "<p>Rejected club names (should be names or part of names):</p><ul>";
         foreach($this->clubRej as $r)
@@ -125,7 +149,7 @@ class Parser extends MY_Controller
         $this->whitelist = $whitelist;
     }
     
-    private function parseItem($doc, $item, $table) {
+    private function parseItem($doc, $item, $table, $keys, &$validKeys) {
         if ($item->childNodes->length == 0)
             return false;     
         $all_club = false;
@@ -160,19 +184,26 @@ class Parser extends MY_Controller
         $mRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorMen), $this->errorMen, $men))); 
         $wRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorWomen), $this->errorWomen, $women)));
         $results = array();
-        
-        $keys = $this->getKeys($table, $this->year); 
-        $validKeys = array();
-        if ($men) array_push($validKeys, $this->push_if_new($results, $keys, 1, $mRes, $headline));
-        if ($women) array_push($validKeys, $this->push_if_new($results, $keys, 0, $wRes, $headline));
+                
+        if ($men) $this->push_if_new($results, $keys, $validKeys, 1, $mRes, $headline);
+        if ($women) $this->push_if_new($results, $keys, $validKeys, 0, $wRes, $headline);
         
         $this->addRecords($table, $results);
-        $this->removeRows($table, $keys, $validKeys);
         return true;
     }
     
-    private function push_if_new(&$results, $keys, $sex, $list, $headline) {
-        $validKeys = array();
+    private function removeRows($table, $keys, $valid) 
+    {
+        foreach(array_keys($keys) as $key) {
+            if (isset($valid[$key]))
+                continue;
+            array_push($this->removed, $key);                
+            $this->db->where('key', $key);
+            $this->db->delete($table);
+        }        
+    }
+    
+    private function push_if_new(&$results, $keys, &$validKeys, $sex, $list, $headline) {        
         foreach($list as $record) {   
             $post = $this->wrapRecord($this->parseRecord($record), $sex, $headline);
             if (count(array_keys($post)) != 12)
@@ -182,7 +213,6 @@ class Parser extends MY_Controller
                 continue;
             array_push($results, $post);
         }
-        $validKeys;
     }
     
     private function getKeys($table, $year) {        
@@ -385,20 +415,6 @@ class Parser extends MY_Controller
         $sql .= ";";        
         $this->db->query($sql);
         return true;
-    }
-    
-    private function removeRows($table, $keys, $valid) 
-    {
-        $remove = array();
-        foreach(array_keys($keys) as $key) {
-            if (!isset($valid[$key])) {
-                array_push($remove, $key);                
-                $this->db->where('key', $key);
-                $this->db->delete($table); 
-            }
-        }
-        foreach($remove as $removed)
-            echo "Row with key: $removed was removed.<br />";
     }
     
     private function iterValues($obj)
