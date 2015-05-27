@@ -22,7 +22,7 @@
             <h1 class="castorama-font">CASTORAMA.SE</h1>
             <button class="{{navClass(0)}} ion-calculator" ng-click="navigate('home', 0)"> Ber&auml;kna</button>
             <button class="{{navClass(1)}} ion-stats-bars" ng-click="navigate('stats', 1)"> Statistik</button>
-            <button class="{{navClass(2)}} ion-soup-can" ng-click="navigate('parser', 2)" ng-if="status.loggedin"> Parsning</button>
+            <button class="{{navClass(2)}} ion-soup-can" ng-click="navigate('parser', 2)" ng-if="status.loggedin"> Databas</button>
             <button class="button-navigation ion-log-out" ng-click="logout()" ng-if="status.loggedin"> Logga ut</button>
         </div>
         <div id="content" ng-view></div>

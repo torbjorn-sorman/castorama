@@ -6,10 +6,9 @@ class Parser extends MY_Controller
     private $cntM = 0;
     private $cntW = 0;
     private $url = "http://www.friidrott.se/rs/resultat.aspx";
-    private $whitelistTable = 'club_whitelist';
     private $year = 0;
-    private $poulateWhitelist = false; 
     private $clubRej = array();
+    private $whitelist;    
     
     private $errorMen = array(
       "!" => "",
@@ -52,31 +51,32 @@ class Parser extends MY_Controller
     public function index()
     {
         if ($this->loggedIn())
-            $this->load->view('parser');        
+            $this->load->view('parser');   
+        else
+            $this->load->view('needlogin');
     }
     
     public function update($year = 2014)
     {
-        if (!$this->loggedIn())
+        if (!$this->loggedIn()) {
+            $this->load->view('needlogin');
             return;
+        }
         $v = intval($year);
         if (!(is_numeric($v) && $v > 2000))
             return;
         
         $this->load->dbutil();
-        $this->load->dbforge();
+        $this->loadWhitelist();
         $tableName = "results";
-        $this->checkDB($tableName);
         
         $this->year = $year;
         
         $doc = new DOMDocument();
-        $doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));
-        
+        @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));        
         $list = $doc->getElementById('marginal')->getElementsByTagName('p');
-        foreach($list as $item) {
+        foreach($list as $item)
             $this->parseItem($doc, $item, $tableName);
-        }
         
         echo json_encode(array(
             "posts" =>  array(
@@ -96,37 +96,17 @@ class Parser extends MY_Controller
         }
         $time = microtime(TRUE);
         $memory = memory_get_usage();
-        
-        $this->load->database();
+                
         $this->load->dbutil();
-        $this->load->dbforge();
-        
-        if ($this->poulateWhitelist && $this->db->table_exists($this->whitelistTable))
-            $this->dbforge->drop_table($this->whitelistTable);
-        if ($this->db->table_exists($tableName))
-            $this->dbforge->drop_table($tableName);
-        
-        if (!$this->db->table_exists($this->whitelistTable)) {
-            $this->dbforge->add_field('id');
-            $this->dbforge->add_field(array(        
-              'partial_name' => array('type' => 'VARCHAR', 'constraint' => 100),
-              'ref' => array('type' => 'INT', 'constraint' => 8),
-              'valid' => array('type' => 'INT', 'constraint' => 2),
-              'year' => array('type' => 'INT', 'constraint' => 5)
-            ));
-            $this->dbforge->create_table($this->whitelistTable);
-            $this->db->query("ALTER TABLE `{$this->whitelistTable}` ADD UNIQUE INDEX (`partial_name`)");
-        }
-        $this->checkDB($tableName);
+        $this->loadWhitelist();
         
         foreach(range(intval($start), intval($end), 1) as $year) {
             $this->year = $year;
             $doc = new DOMDocument();
             @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
             $list = $doc->getElementById('marginal')->getElementsByTagName('p');
-            foreach($list as $item) {
+            foreach($list as $item)
                 $this->parseItem($doc, $item, $tableName);
-            }
         }
         echo "<p>Rejected club names (should be names or part of names):</p><ul>";
         foreach($this->clubRej as $r)
@@ -137,27 +117,12 @@ class Parser extends MY_Controller
         print sprintf("%.2f",(microtime(TRUE)-$time)). ' seconds and '. (memory_get_usage()-$memory). ' bytes';
     }
     
-    private function checkDB($tableName) {
-        if (!$this->db->table_exists($tableName)) {
-            $this->dbforge->add_field('id');
-            $this->dbforge->add_field(array(
-              'sex' => array('type' => 'INT', 'constraint' => 1),
-              'date' => array('type' => 'DATE'),
-              'location' => array('type' => 'VARCHAR', 'constraint' => 50),
-              'name' => array('type' => 'VARCHAR', 'constraint' => 50),
-              'birthyear' => array('type' => 'INT', 'constraint' => 5),
-              'club' => array('type' => 'VARCHAR', 'constraint' => 50),
-              'score' => array('type' => 'INT', 'constraint' => 4),
-              'shot' => array('type' => 'INT', 'constraint' => 4),
-              'javelin' => array('type' => 'INT', 'constraint' => 5),
-              'discus' => array('type' => 'INT', 'constraint' => 4),
-              'hammer' => array('type' => 'INT', 'constraint' => 4),
-              'key' => array('type' => 'VARCHAR', 'constraint' => 32),
-            ));
-            $this->dbforge->create_table($tableName);
-            $this->db->query("ALTER TABLE `$tableName` ADD UNIQUE INDEX (`key`)");
-        }
-        
+    private function loadWhitelist() {
+        require "data/club_whitelist.php";
+        $whitelist = array();
+        foreach($club_whitelist as $club)
+            $whitelist[$club['partial_name']] = true;
+        $this->whitelist = $whitelist;
     }
     
     private function parseItem($doc, $item, $table) {
@@ -196,34 +161,28 @@ class Parser extends MY_Controller
         $wRes = $this->explodeNoEmpty(",", str_replace(".", "", str_replace(array_keys($this->errorWomen), $this->errorWomen, $women)));
         $results = array();
         
-        $keys = $this->getKeys($table, $this->year);                
-        if ($men)
-            $this->push_if_new($results, $keys, 1, $mRes, $headline);
-        if ($women)
-            $this->push_if_new($results, $keys, 0, $wRes, $headline);
-        /*
-        if ($men) {
-            foreach($mRes as $record) {   
-                $post = $this->wrapRecord($this->parseRecord($record), 1, $headline);
-                if ($keys[$post['key']])
-                    array_push($results, $post);
-            }
-        }
-        if ($women)
-            foreach($wRes as $record)
-                array_push($results, $this->wrapRecord($this->parseRecord($record), 0, $headline));
-         * */
+        $keys = $this->getKeys($table, $this->year); 
+        $validKeys = array();
+        if ($men) array_push($validKeys, $this->push_if_new($results, $keys, 1, $mRes, $headline));
+        if ($women) array_push($validKeys, $this->push_if_new($results, $keys, 0, $wRes, $headline));
+        
         $this->addRecords($table, $results);
+        $this->removeRows($table, $keys, $validKeys);
         return true;
     }
     
     private function push_if_new(&$results, $keys, $sex, $list, $headline) {
+        $validKeys = array();
         foreach($list as $record) {   
             $post = $this->wrapRecord($this->parseRecord($record), $sex, $headline);
-            if (count(array_keys($post)) != 12 || isset($keys[$post['key']]))
+            if (count(array_keys($post)) != 12)
+                continue;
+            $validKeys[$post['key']] = true;
+            if (isset($keys[$post['key']]))
                 continue;
             array_push($results, $post);
         }
+        $validKeys;
     }
     
     private function getKeys($table, $year) {        
@@ -326,7 +285,7 @@ class Parser extends MY_Controller
     
     // REWRITE TO PREG_REPLACE
     private function str_replace_patterns(&$str)
-    {    
+    {   
         $replacements = array(
           "/(\d),(\d{3})/" => "$1$2",
           "/(\s|^)\d\)\s/" => " ",
@@ -336,7 +295,7 @@ class Parser extends MY_Controller
           "/Anm:.*/" => "",
           "/(\((\d{3,4}\s*){4})[^\d\)]/" => "$1)$3, ",
           "/\(([^\(\)]+\()/" => "$1",
-          "/\d(\d{2}\s*\d\.\d{3})/" => "$1"
+          "/\s\d(\d{2}\s*\d\.\d{3})/" => " $1"
         );
         $count = 0;
         $str = preg_replace(array_keys($replacements), $replacements, $str, -1, $count);
@@ -394,24 +353,14 @@ class Parser extends MY_Controller
         return $count;
     }
     
-    private function whitelistedClub($club) 
+    private function whitelistedClub($partialName) 
     {
-        if (!$club || $club == "")
-            return false;
-        if ($this->poulateWhitelist) {
-            $this->addClubToWhitelist(array($club));
+        if (!$partialName || $partialName == "")
+            return false;        
+        if (isset($this->whitelist[$partialName]))
             return true;
-        }
-        $sql = "SELECT EXISTS(SELECT 1 FROM {$this->whitelistTable} WHERE partial_name ='$club' AND valid =1 LIMIT 1)";
-        $resp = $this->db->query($sql);    
-        foreach($resp->result()[0] as $response) {      
-            if (intval($response) == 0) {
-                array_push($this->clubRej, $club." \t".$this->year);
-                return false;
-            }
-            return true;
-        }
-        return true;
+        array_push($this->clubRej, $partialName." \t".$this->year);
+        return false;
     }
     
     private function addRecords($table, $res) 
@@ -438,6 +387,20 @@ class Parser extends MY_Controller
         return true;
     }
     
+    private function removeRows($table, $keys, $valid) 
+    {
+        $remove = array();
+        foreach(array_keys($keys) as $key) {
+            if (!isset($valid[$key])) {
+                array_push($remove, $key);                
+                $this->db->where('key', $key);
+                $this->db->delete($table); 
+            }
+        }
+        foreach($remove as $removed)
+            echo "Row with key: $removed was removed.<br />";
+    }
+    
     private function iterValues($obj)
     {
         $str = "";
@@ -446,25 +409,7 @@ class Parser extends MY_Controller
         }
         return substr($str, 0, strlen($str) - 2);
     }
-    
-    private function addClubToWhitelist($names)
-    {
-        if (count($names) == 0)
-            return;
-        $sql = $this->db->insert_string($this->whitelistTable, array(
-          'partial_name' => trim($names[0]),
-          'ref' => 1,
-          'valid' => 1,
-          'year' => $this->year      
-        ));
-        if (count($names) > 1) {
-            for($i = 1; $i < count($names); ++$i)
-                $sql .= ",('".trim($names[$i])."', {$this->year}, 1)";
-        }
-        $sql .= "ON DUPLICATE KEY UPDATE ref=ref+1;";
-        @$this->db->query($sql);
-    }
-    
+        
     private function getClubFromHeadline($str)
     {    
         if (preg_match("/(Sa?mt?lin?ga|Båda)\s+(.+)/i", $str, $match) == 1) {

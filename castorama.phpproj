@@ -79,6 +79,7 @@
     <Compile Include="application\views\main.php" />
     <Compile Include="application\.htaccess" />
     <Compile Include="application\index.html" />
+    <Compile Include="application\views\needlogin.php" />
     <Compile Include="application\views\stats.php" />
     <Compile Include="application\views\parser.php" />
     <Compile Include="system\core\compat\hash.php" />

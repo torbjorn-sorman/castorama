@@ -161,3 +161,15 @@ input[type="text"], input[type="number"], input[type="password"] , input[type="s
     width: 400px;
     height: 200px;
 }
+
+.loading-spinner {
+  width: 126px;
+  height: 126px;
+  margin: auto;
+  background: url('../img/spiffygif_126x126.png') top;
+  animation: play .8s steps(18) infinite;
+}
+
+@keyframes play {
+    100% { background-position: left bottom; }
+}

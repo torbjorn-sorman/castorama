@@ -30,15 +30,14 @@
 .controller('ParserController', function ($scope, $http) {
     $scope.loading = false;
     $scope.options = { year: 2001 };
+    $scope.response = { message: false, posts: {men: 0, women: 0} };
     $scope.updateDB = function (options) {
         $scope.loading = true;
         $http.get('/index.php/parser/update/' + options.year).success(function (data) {
-            console.log(data);
+            $scope.response.message = true;
+            $scope.response.posts = data.posts;
             $scope.loading = false;
         });
-    }
-    $scope.timeout = function () {        
-        $scope.loading = false;
     }
 })
 
