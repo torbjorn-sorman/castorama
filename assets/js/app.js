@@ -4,7 +4,7 @@
 // 2015-04-20
 ////////////////////
 
-var app = angular.module('castorama', ['ngRoute', 'castorama.services', 'castorama.controllers', 'castorama.filters']);
+var app = angular.module('castorama', ['ngRoute', 'castorama.services', 'castorama.controllers', 'castorama.filters', 'infinite-scroll']);
 
 // App Configurations
 app.config(function ($routeProvider, $locationProvider) {

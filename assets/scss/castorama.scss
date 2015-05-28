@@ -1,24 +1,16 @@
+@import "colors.scss";
 
-// Turquoise Blue
-$color-alpha: #57E6BB !default;
-// Mountain Meadow
-$color-beta: #14A57A !default;
-// Hippie Green
-$color-gamma: #4D764E !default;
-// Christi
-$color-delta: #64AE11 !default;
-// Atlantis
-$color-epsilon: #9DD72A !default;
-// Sulu
-$color-zeta: #C1EE5F !default;
-
+$page-padding-left: 10%;
+$page-padding-right: 10%;
 $footer-bar-height: 100px;
 $event-icon-size: 42px;
 
-// Include all of Ionic
 @import "default.scss";
+@import "animations.scss";
+@import "navigation.scss";
+@import "statistics.scss";
+@import "parser.scss";
 @import "home.scss";
-@import "button.scss";
 @import "../css/ionicons.css";
 
 @font-face {
@@ -36,88 +28,85 @@ $event-icon-size: 42px;
 }
 
 #container {
-    min-height: 100%;
     position: relative;
+    min-height: 100%;
+    min-width: 100%;
 }
 
 #header {
-    background-color: $color-alpha;
-    padding-left: 10%;
-    padding-right: 10%;
-    padding-top: 3%;
-    padding-bottom: 1%;
+    padding: 3% $page-padding-right 1% $page-padding-left;
 }
 
-#content {
-    background-color: $color-beta;
-    padding: 10px;
-    padding-left: 10%;
-    padding-right: 10%;
-    min-height: 400px;
-    padding-bottom: $footer-bar-height + 30px;
+#content {   
+    padding: 1% $page-padding-right 1% $page-padding-left;    
 }
 
 #footer {
-    position: absolute;
-    height: $footer-bar-height;
-    bottom: 0px;
-    left: 0px;
-    width: 100%;
-    background-color: $color-zeta;
+    width: 100%;  
     font-size: 10px;
-    padding: 5px;
-    padding-left: 10%;
-    padding-right: 10%;
-    padding-top: 1%;
+    padding: 3% $page-padding-right 1% $page-padding-left;
 }
 
+.bordered {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    overflow: auto;
+}
+
+.transparent-button {
+    background-color: Transparent;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+}
+
+/*
+    DROP-DOWN
+*/
 .drop-down {
+    @extend .bordered;
+    width: 100%;    
+    margin: 10px;
+}
+
+.drop-down-head {
     position: relative;
     width: 100%;
-    height: 36px;
-    color: $color-alpha;
-    background-color: $color-gamma;
-    border-radius:5px;
-    padding: 5px;
+    height: 52px;
 }
 
-.drop-down-title {
-    padding-left: 10px;
-    font-size: 26px;
+.drop-down-head-content {    
     font-weight: 600;
     position: absolute;
     top: 0px;
+    padding-left: 20px;    
+    padding-right: 20px;
+}
+
+.drop-down-title {
+    @extend .drop-down-head-content;    
+    font-size: 26px;
     left: 0px;
     padding-top: 10px;
 }
 
 .drop-down-toggle {
-    padding-right: 20px;
+    @extend .drop-down-head-content;
     font-size: 36px;
-    position: absolute;
-    font-weight: 600;
-    top: 0px;
     right: 0px;
     padding-top: 5px;
 }
 
-.stats-table {
-    width: 100%;
-}
-
-.row-item {
-    color: white;
-}
-.row-header {
-    color: white;
-}
-
 .selection-border {
-    border: 2px solid $color-alpha;
+    border: 2px solid;
 }
 
 .selected {
-    border: 2px solid $color-alpha;
+    color: white;
+    background-color: black;
     padding: 4px 14px;
     border-radius: 30px;
 }
@@ -154,7 +143,6 @@ $event-icon-size: 42px;
 .number-display {
     font-family: "DIN145136breit";
     font-size: 28px;
-    color: $color-epsilon;
 }
 
 .event-display {
@@ -162,44 +150,40 @@ $event-icon-size: 42px;
     margin-right: 20%;
 }
 
-.event-display img {
+.icon-small {
     width: 30px;
     height: 30px;
 }
 
-.stats-search {
-    width: 50%;
-}
 
-.admin-title {    
+.admin-title {
     margin: auto;
     width: 80%;
     height: 40px;
     padding: 5px;
 }
 
-.login-content {    
+.login-content {
     padding-right: 20%;
     width: 400px;
     height: 200px;
 }
 
 .highlighted-text {
-    color: $color-alpha;
-    background-color: $color-gamma;
-    border-radius:5px;
+    color: white;
+    background-color: black;
+    border-radius: 5px;
     padding: 5px;
 }
 
-.loading-spinner {
-  width: 126px;
-  height: 126px;
-  margin: 20px;
-  background: url('../img/spiffygif_126x126.png') top;
-  background-repeat: no-repeat;
-  animation: play 1s steps(18) infinite;
+.button-discreet {
+    @extend .transparent-button;
+    font-size: 12px;
 }
 
-@keyframes play {
-    100% { background-position: bottom; }
+.button-top {   
+    float: left; 
+    font-size: 24px;
+    border-radius:6px;
+    padding: 5px;
 }

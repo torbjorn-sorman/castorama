@@ -1,0 +1,25 @@
+﻿.nav-main-template {   
+    float: left; 
+    font-size: 24px;
+    border-radius:6px;
+    padding: 5px 1% 5px 1%;    
+}
+
+.nav-main {
+    @extend .nav-main-template;
+    float: left; 
+}
+
+.nav-main-user {
+    @extend .nav-main-template;
+    float: right; 
+}
+
+.nav-main:hover, .nav-main-user:hover {
+    color: rgb(128, 128, 128);
+}
+
+.nav-sel {
+    color: white;
+    background-color: black;
+}

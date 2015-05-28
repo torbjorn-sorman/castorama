@@ -1,0 +1,33 @@
+﻿
+.loading-spinner {
+    width: 126px;
+    height: 126px;
+    margin: 20px;
+    background: url('../img/spiffygif_126x126.png') top;
+    background-repeat: no-repeat;
+    animation: play 1s steps(18) infinite;
+}
+
+@keyframes play {
+    0% {
+        background-position: top;
+    }
+    100% {
+        background-position: bottom;
+    }
+}
+
+.animate-loading {    
+    color: rgba(0,0,0,0.75);
+    position:absolute;    
+    animation: rotate2D 3s linear infinite;
+}
+
+@keyframes rotate2D {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

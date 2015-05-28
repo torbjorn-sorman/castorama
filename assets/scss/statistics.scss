@@ -1,0 +1,46 @@
+﻿.stats-search {
+    width: 50%;
+}
+
+.stats-table {
+    width: 100%;
+}
+
+.stats-alt {
+    position: relative;
+    overflow: auto;
+    padding-bottom: 1%;
+    padding-top: 1%;
+    padding-left: 10%;
+    width: 25%;
+}
+
+.stats-alt-gen {
+    padding-left: 1%;
+    font-size: 48px;
+    float: left;
+}
+
+.stats-alt span {
+    float: left;
+    width: 10%;
+}
+
+.stats-alt-dates {
+    position: relative;
+    width: 15%;
+}
+
+.stats-clear {    
+    border-radius:6px;
+    padding: 5px;
+    margin-top: 2%;
+    float: right;
+}
+
+.stats-load {  
+    margin-left: 30%;
+    bottom: 50px;
+    overflow: hidden;
+    font-size: 200px;
+}

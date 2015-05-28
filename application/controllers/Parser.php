@@ -49,12 +49,35 @@ class Parser extends MY_Controller
       "K B: " => ","
     );
     
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->dbutil();
+    } 
+    
     public function index()
     {
         if ($this->loggedIn())
             $this->load->view('parser');   
         else
             $this->load->view('needlogin');
+    }
+    
+    public function score() {
+        if (!$this->loggedIn()) {
+            $this->load->view('needlogin');
+            return;
+        }        
+        
+        $set = "SET @num := 0, @group := '';";
+        $subquery = "SELECT `club`, score, @num := IF(@group = `club` COLLATE 'utf8_swedish_ci', @num + 1, 1) AS row_number, @group := `club` AS dummy FROM season ORDER BY `club`, score desc";
+        $subquery = "SELECT club, score FROM ($subquery) AS x WHERE x.row_number <= 12";        
+        $select = "SELECT 1 = NULL, `club`, SUM(score) score FROM ($subquery) as X WHERE X.club NOT LIKE '' GROUP BY club";        
+        $sql = "INSERT INTO season_clubs $select;";   
+        $this->db->truncate('season_clubs');        
+        $this->db->query($set);
+        $this->db->query($sql);
+        echo "Club scores updated ";        
     }
     
     public function season($year = 2014) {
@@ -64,11 +87,20 @@ class Parser extends MY_Controller
         }
         
         $nonCompete = "AUS|CAN|CYP|DEN|ESP|EST|FIN|FRA|GBR|GER|GRE|IRL|IRN|ISL|ISR|JAM|LAT|NOR|SRB|USA|USS";
-        $select = "SELECT name, max(score)";
-        $where = "WHERE date BETWEEN '$year-01-01' AND '".($year + 1)."-01-01' AND sex = 1 AND club NOT REGEXP '$nonCompete'";
-        $sql = "$select FROM results $where GROUP BY name ORDER BY score DESC;";
-        $query = $this->db->query($sql);
-        echo json_encode($query->result());
+        
+        $cols = "`id`, `sex`, `date`, `location`, `name`, `birthyear`, `club`, `score`, `shot`, `javelin`, `discus`, `hammer`, `key`";  
+        $select = "SELECT `id`, `sex`, `date`, `location`, `name`, `birthyear`, `club`, max(`score`) `score`, `shot`, `javelin`, `discus`, `hammer`, `key`";
+        $where = "WHERE date BETWEEN '$year-01-01' AND '".($year + 1)."-01-01'";
+        $sql = "INSERT INTO season ($cols) $select FROM results $where AND `club` NOT REGEXP '$nonCompete' GROUP BY `name`";  
+        
+        $this->db->truncate('season');
+        if($this->db->query($sql))
+            echo "Season created ";
+        
+        $sql = "INSERT INTO season_all ($cols) $select FROM results $where GROUP BY `name`";                
+        $this->db->truncate('season_all');
+        if ($this->db->query($sql))
+            echo "Season all created";
     }
     
     public function update($year = 2014)
@@ -81,7 +113,7 @@ class Parser extends MY_Controller
         if (!(is_numeric($v) && $v > 2000))
             return;
         
-        $this->load->dbutil();
+        
         $this->loadWhitelist();
         $tableName = "results";
         $this->removed = array();
@@ -118,7 +150,6 @@ class Parser extends MY_Controller
         $time = microtime(TRUE);
         $memory = memory_get_usage();
                 
-        $this->load->dbutil();
         $this->loadWhitelist();
         
         foreach(range(intval($start), intval($end), 1) as $year) {

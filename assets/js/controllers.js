@@ -26,7 +26,7 @@
 .controller('StatsController', function ($scope, $http) {
     var canLoadMore = true;
     var offset = 0;
-    var limit = 50;
+    var limit = 20;
     var options = {
         gen: 'all',
         from: 1981,
@@ -39,20 +39,21 @@
         club: ""
     };
 
+    $scope.loading = false;
     $scope.showSearch = false;
     $scope.showOptions = false;
     $scope.opt = options;
     $scope.search = search;
     $scope.result = [];
-    $scope.addMoreItems = function () {
+    $scope.addMoreItems = function () {        
+        $scope.loading = true;
         $http.post('/stats/search/', postData(limit, offset)).success(function (data) {
+            $scope.loading = false;
             canLoadMore = (data.length == limit);
             for (var i = 0; i < data.length; ++i) {
                 $scope.result.push(data[i]);
-                //RecordTracker.set(data[i]);
             }
             offset += data.length;
-            //$scope.$broadcast('scroll.infiniteScrollComplete');
         });
     };
     $scope.moreItemsCanBeLoaded = function () {
@@ -64,6 +65,9 @@
     $scope.toggleOptions = function () {
         $scope.showOptions = !$scope.showOptions;
     };
+    $scope.clearSearch = function () {
+        console.log('clear search-fields');
+    }
     function postData(limit, offset) {
         var d = {
             fromdate: $scope.opt.from + "-01-01",
@@ -85,16 +89,20 @@
     $scope.showWomen = false;
     $scope.showClub = false;
     $scope.result = { men: [], women: [], club: [] };
+    $scope.showAll = false;
     $http.get('/stats/season/2014/1/0').success(function (data) {
         for (var i = 0; i < data.length; ++i) {
-            console.log(data);
             $scope.result.men.push(data[i]);
         }
     });
     $http.get('/stats/season/2014/0/0').success(function (data) {
         for (var i = 0; i < data.length; ++i) {
-            console.log(data);
             $scope.result.women.push(data[i]);
+        }
+    });
+    $http.get('/stats/season/2014/2/0').success(function (data) {
+        for (var i = 0; i < data.length; ++i) {
+            $scope.result.club.push(data[i]);
         }
     });
     $scope.toggleMen = function () {
@@ -110,13 +118,40 @@
 
 .controller('ParserController', function ($scope, $http) {
     $scope.loading = false;
-    $scope.options = { year: 2001 };
-    $scope.response = { message: false, posts: { men: 0, women: 0 } };
-    $scope.updateDB = function (options) {
+    $scope.year = 2001;
+    $scope.season = 2014;
+    $scope.response = {
+        update: { message: false, text: "" },
+        season: { message: false, text: "" },
+        score: { message: false, text: "" }
+    };
+    $scope.updateDB = function (year) {
+        if ($scope.loading)
+            return;
         $scope.loading = true;
-        $http.get('/index.php/parser/update/' + options.year).success(function (data) {
-            $scope.response.message = true;
-            $scope.response.posts = data.posts;
+        $http.get('/index.php/parser/update/' + year).success(function (data) {
+            $scope.response.update.message = true;
+            $scope.response.update.text = JSON.stringify(data);
+            $scope.loading = false;
+        });
+    }
+    $scope.updateSeason = function (season) {
+        if ($scope.loading)
+            return;
+        $scope.loading = true;
+        $http.get('/index.php/parser/season/' + season).success(function (data) {
+            $scope.response.season.message = true;
+            $scope.response.season.text = JSON.stringify(data);
+            $scope.loading = false;
+        });
+    }
+    $scope.updateScore = function () {
+        if ($scope.loading)
+            return;
+        $scope.loading = true;
+        $http.get('/index.php/parser/score/').success(function (data) {
+            $scope.response.score.message = true;
+            $scope.response.score.text = JSON.stringify(data);
             $scope.loading = false;
         });
     }

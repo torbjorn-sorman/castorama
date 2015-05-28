@@ -52,11 +52,13 @@ class Stats extends CI_Controller
         header('Access-Control-Allow-Origin: *');
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
         header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        $this->load->database();
-        $nonCompete = "AUS|CAN|CYP|DEN|ESP|EST|FIN|FRA|GBR|GER|GRE|IRL|IRN|ISL|ISR|JAM|LAT|NOR|SRB|USA|USS";
-        $select = "SELECT name, club, max(score) score";
-        $where = "WHERE date BETWEEN '$year-01-01' AND '".($year + 1)."-01-01' AND sex = $sex" . ($all == 0 ? " AND club NOT REGEXP '$nonCompete'" : "");
-        $sql = "$select FROM results $where GROUP BY name ORDER BY score DESC LIMIT 25";        
+        
+        $s = intval($sex);
+        $a = intval($all);               
+        $this->load->database();  
+        $table = (($s == 2) ? 'season_clubs' : ($a == 0 ? 'season_all' : 'season'));
+        $cond = (($s < 2) ? "WHERE sex = $s" : "");
+        $sql = "SELECT * FROM $table $cond ORDER BY score DESC";        
         $query = $this->db->query($sql);
         echo json_encode($query->result());
     }

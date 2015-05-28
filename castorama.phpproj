@@ -676,10 +676,14 @@
     <Content Include="assets\lib\ionic\scss\_util.scss" />
     <Content Include="assets\lib\ionic\scss\_variables.scss" />
     <Content Include="assets\lib\ionic\version.json" />
-    <Content Include="assets\scss\button.scss" />
+    <Content Include="assets\scss\animations.scss" />
     <Content Include="assets\scss\castorama.scss" />
+    <Content Include="assets\scss\colors.scss" />
     <Content Include="assets\scss\default.scss" />
     <Content Include="assets\scss\home.scss" />
+    <Content Include="assets\scss\navigation.scss" />
+    <Content Include="assets\scss\parser.scss" />
+    <Content Include="assets\scss\statistics.scss" />
     <Content Include="assets\svg\add-to-list.svg" />
     <Content Include="assets\svg\add-user.svg" />
     <Content Include="assets\svg\address.svg" />

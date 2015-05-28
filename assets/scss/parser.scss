@@ -1,0 +1,26 @@
+﻿
+.parser-category {
+    border: 1px solid black;
+    border-radius: 5px;
+    position: relative;
+    margin-left: 10%;
+    margin-bottom: 1%;
+    padding: 1%;
+    width: 30%;
+    min-height: 240px;
+    overflow: auto;
+    text-align: left;
+}
+
+.parser-load {    
+    font-size: 200px;
+}
+
+.parser-start-button {
+    font-size: 24px;
+    border-radius:10px;
+    padding: 5px;
+    font-size: 32px;
+    outline: none;
+    float: right;
+}

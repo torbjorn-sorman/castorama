@@ -68,12 +68,6 @@ $db['default'] = array(
     'username' => 'Nicklas',
     'password' => 'stikoper10',
     'database' => 'castorama',
-    /*
-	'hostname' => 'castorama-134317.mysql.binero.se',
-	'username' => '134317_cz28467',
-	'password' => 'casto1986',
-	'database' => '134317-castorama',
-     */
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,

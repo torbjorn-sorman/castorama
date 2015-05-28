@@ -1,59 +1,48 @@
-﻿// Turquoise Blue
-$color-alpha: #57E6BB !default;
-// Mountain Meadow
-$color-beta: #14A57A !default;
-// Hippie Green
-$color-gamma: #4D764E !default;
-// Christi
-$color-delta: #64AE11 !default;
-// Atlantis
-$color-epsilon: #9DD72A !default;
-// Sulu
-$color-zeta: #C1EE5F !default;
+﻿@import "colors.scss";
 
-.gender-left {
-    float: left;
-}
-
-.gender-right {
-    float: right;
-}
-
-.gender-icon {
-    height: 50px;
-    padding: 6px 16px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.scoretable-gender-selection {
-    margin: auto;
-    padding-right: 20%;
-    width: 200px;
+.score-gender {
+    position: relative;
+    margin-left: 10%;
+    width: 10%;
     height: 100px;
 }
 
-.calc-output {
-    float: right;
-    margin-right: 20%;
-    margin-top: 64px;
+.score-button {
+    @extend .transparent-button;
+    font-size: 50px;
+    padding: 6px 16px;
 }
 
-.number-display-large {
+.score-man {
+    @extend .score-button;
+    float: left;
+}
+
+.score-woman {
+    @extend .score-button;
+    float: right;
+}
+
+.score-man:hover, .score-woman:hover {
+    color: rgb(128,128,128);
+}
+
+.score-output {
+    margin-left: 20%;
+    margin-top: 1%;
     font-family: "DIN145136breit";
     font-size: 128px;
-    color: $color-epsilon;
 }
 
 td.event {
-    width: 25%;
+    width: 10%;
 }
 
 td.result {
-    width: 50%;
+    width: 10%;
 }
 
 td.score {
-    width: 25%;
+    width: 90%;
     margin: auto;
 }
