@@ -41,11 +41,20 @@ class Stats extends CI_Controller
         if ($input->name != '')
             $cond['name LIKE'] = "%".$input->name."%";
         if ($input->club != '')
-            $cond['club LIKE'] = "%".$input->club."%";        
+            $cond['club LIKE'] = "%".$input->club."%";  
+        if ($input->location != '')
+            $cond['location LIKE'] = "%".$input->location."%";        
         
         $this->db->order_by($input->orderby, $input->orderbydir);
+        if ($this->isEvent($input->orderby)) {
+            $cond[$input->orderby . ' >'] = 0;
+        }
         $query = $this->db->get_where($this->table, $cond, $input->limit, $input->offset);
         echo json_encode($query->result());
+    }
+    
+    private function isEvent($val) {
+        return $val == 'shot' || $val == 'javelin' || $val == 'discus' || $val == 'hammer';
     }
     
     public function season($year = 2014, $sex = 1, $all = 0) {

@@ -23,30 +23,48 @@
     }
 })
 
-.controller('StatsController', function ($scope, $http) {
+.controller('StatsController', function ($scope, $http, $filter) {
     var canLoadMore = true;
     var offset = 0;
-    var limit = 20;
+    var limit = 25;
     var options = {
         gen: 'all',
-        from: 1981,
-        to: 2015,
+        from: new Date(1980, 0, 1),
+        to: new Date(),
         dir: 'desc',
         order: 'date'
     };
     var search = {
         name: "",
-        club: ""
+        club: "",
+        location: ""
     };
-
+    var orderingItems = [
+      new OrderItem("Datum", 'date'),
+      new OrderItem("Namn", 'name'),
+      new OrderItem("Plats", 'location'),
+      new OrderItem("Förening", 'club'),
+      new OrderItem("Poäng", 'score'),
+      new OrderItem("Kula", 'shot', 'shot'),
+      new OrderItem("Spjut", 'javelin', 'javelin'),
+      new OrderItem("Diskus", 'discus', 'discus'),
+      new OrderItem("Slägga", 'hammer', 'hammer')
+    ];
+    $scope.orderItems = orderingItems;
     $scope.loading = false;
     $scope.showSearch = false;
     $scope.showOptions = false;
     $scope.opt = options;
+
+    
+
     $scope.search = search;
     $scope.result = [];
     $scope.addMoreItems = function () {        
         $scope.loading = true;
+
+        console.log(postData(limit, offset));
+
         $http.post('/stats/search/', postData(limit, offset)).success(function (data) {
             $scope.loading = false;
             canLoadMore = (data.length == limit);
@@ -59,6 +77,19 @@
     $scope.moreItemsCanBeLoaded = function () {
         return canLoadMore;
     };
+    $scope.refresh = function () {
+        $scope.result = [];
+        offset = 0;
+        $scope.loading = false;
+        canLoadMore = true;
+        $scope.addMoreItems();
+    }
+    $scope.$watch('opt', function () {
+        $scope.refresh();
+    }, true);
+    $scope.$watch('search', function () {        
+        $scope.refresh();
+    }, true);
     $scope.toggleSearch = function () {
         $scope.showSearch = !$scope.showSearch;
     };
@@ -66,15 +97,27 @@
         $scope.showOptions = !$scope.showOptions;
     };
     $scope.clearSearch = function () {
-        console.log('clear search-fields');
+        $scope.search = {
+            name: "",
+            club: "",
+            location: ""
+        };
     }
+    $scope.toMeter = function (val) {
+        if (val == 0)
+            return "";
+        var text = val, fixed;
+        return text.replace(/(^\d?\d)(\d\d)/, "$1,$2");
+    }
+
     function postData(limit, offset) {
         var d = {
-            fromdate: $scope.opt.from + "-01-01",
-            todate: ($scope.opt.to + 1) + "-01-01",
+            fromdate: $filter('date')($scope.opt.from, 'yyyy-MM-dd'),
+            todate: $filter('date')($scope.opt.to, 'yyyy-MM-dd'),
             gender: $scope.opt.gen,
             name: $scope.search.name,
             club: $scope.search.club,
+            location: $scope.search.location,
             limit: limit,
             offset: offset,
             orderby: $scope.opt.order,
@@ -165,3 +208,8 @@
     }
 });
 
+function OrderItem(title, column) {
+    if (arguments.length > 2)
+        return { title: title, column: column, name: arguments[2], isImg: true };
+    return { title: title, column: column, isImg: false };
+}

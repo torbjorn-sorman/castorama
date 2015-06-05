@@ -12,17 +12,23 @@
     padding-bottom: 1%;
     padding-top: 1%;
     padding-left: 10%;
-    width: 25%;
+    width: 33%;
+    float: left;
 }
 
-.stats-alt-gen {
+.stats-alt-icon {
     padding-left: 1%;
     font-size: 48px;
     float: left;
 }
 
+.stats-alt-radio {
+    padding-left: 1%;
+    font-size: 24px;
+}
+
 .stats-alt span {
-    float: left;
+    //float: left;
     width: 10%;
 }
 
@@ -31,16 +37,41 @@
     width: 15%;
 }
 
-.stats-clear {    
+.stats-button {    
     border-radius:6px;
     padding: 5px;
     margin-top: 2%;
+    margin-left: 1%;
     float: right;
 }
 
 .stats-load {  
-    margin-left: 30%;
-    bottom: 50px;
-    overflow: hidden;
-    font-size: 200px;
+    margin-left: -64px;
+    font-size: 128px;
+    height: 128px;
+    left: 50%;
+}
+
+.stats-header-number, .stats-number {
+    text-align: right;
+}
+
+.stats-number {  
+    font-family: "Courier New", Courier, monospace;
+    font-size: 18px;
+}
+
+.stats-alt-button {
+    @extend .transparent-button;
+    font-size: 20px;
+    //float: right;
+    padding: 4px 14px;
+}
+
+.stats-alt-button:hover {
+    color: rgb(128,128,128);
+}
+
+.stats-result {
+    min-height: 300px;
 }

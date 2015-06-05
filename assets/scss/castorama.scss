@@ -111,6 +111,10 @@ $event-icon-size: 42px;
     border-radius: 30px;
 }
 
+img.image-clickable:hover {
+    opacity: 0.5;
+}
+
 .icon {
     width: 32px;
     height: 32px;
