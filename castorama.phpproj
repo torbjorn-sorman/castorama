@@ -50,6 +50,7 @@
     <Compile Include="application\controllers\Parser.php" />
     <Compile Include="application\controllers\Setup.php" />
     <Compile Include="application\controllers\Stats.php" />
+    <Compile Include="application\controllers\Templates.php" />
     <Compile Include="application\controllers\Verify.php" />
     <Compile Include="application\core\index.html" />
     <Compile Include="application\core\MY_Controller.php" />
@@ -85,6 +86,7 @@
     <Compile Include="application\views\season.php" />
     <Compile Include="application\views\stats.php" />
     <Compile Include="application\views\parser.php" />
+    <Compile Include="application\views\templates\stats-record.php" />
     <Compile Include="system\core\compat\hash.php" />
     <Compile Include="system\core\compat\index.html" />
     <Compile Include="system\core\compat\mbstring.php" />
@@ -500,6 +502,7 @@
     <Folder Include="application\views\errors" />
     <Folder Include="application\views" />
     <Folder Include="application" />
+    <Folder Include="application\views\templates\" />
     <Folder Include="assets\" />
     <Folder Include="assets\css\" />
     <Folder Include="assets\css\fonts\" />
@@ -608,6 +611,7 @@
     <Content Include="assets\js\data\score_table\women\hammer.json" />
     <Content Include="assets\js\data\score_table\women\javelin.json" />
     <Content Include="assets\js\data\score_table\women\shot.json" />
+    <Content Include="assets\js\directives.js" />
     <Content Include="assets\js\ext\jquery-2.1.4.min.js" />
     <Content Include="assets\js\ext\ng-infinite-scroll.js" />
     <Content Include="assets\js\filters.js" />

@@ -1,5 +1,6 @@
 ﻿
-function Castorama(scoreTable) {
+function Castorama(scoreTable)
+{
     var table = scoreTable;
     var gender = new Gender('men');
     var sum = new Sum();

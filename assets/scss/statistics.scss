@@ -1,9 +1,44 @@
-﻿.stats-search {
-    width: 50%;
-}
+﻿
 
 .stats-table {
     width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-table tr {
+    border: solid rgba(0, 0, 0, 0.25);
+    border-width: 1px 0;
+}
+.stats-table tr:first-child, .stats-table tr:last-child {
+    border: none;
+}
+
+.stats-table tr td, .stats-table tr th {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.stats-table tr td:first-child, .stats-table tr th:first-child {
+    width: 35%;
+}
+
+.stats-table tr th:not(:first-child) {
+    width: 13%;
+}
+
+.stats-table tr td:not(:first-child) {
+    text-align: right;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 32px;
+    width: 13%;
+}
+
+.stats-table tr .col-selected {
+    background-color: rgba(0,0,0,0.0625);    
+}
+
+.stats-table tr th.col-selected {
+    border-radius: 10px 10px 0 0;    
 }
 
 .stats-alt {
@@ -16,33 +51,22 @@
     float: left;
 }
 
-.stats-alt-icon {
-    padding-left: 1%;
-    font-size: 48px;
-    float: left;
-}
-
-.stats-alt-radio {
-    padding-left: 1%;
-    font-size: 24px;
-}
-
-.stats-alt span {
-    //float: left;
-    width: 10%;
-}
-
-.stats-alt-dates {
-    position: relative;
-    width: 15%;
-}
-
 .stats-button {    
     border-radius:6px;
     padding: 5px;
     margin-top: 2%;
     margin-left: 1%;
     float: right;
+}
+
+.stats-alt-button {
+    @extend .transparent-button;
+    font-size: 24px;
+    padding: 4px 14px;
+}
+
+.stats-alt-button:hover {
+    color: rgb(128,128,128);
 }
 
 .stats-load {  
@@ -52,26 +76,10 @@
     left: 50%;
 }
 
-.stats-header-number, .stats-number {
-    text-align: right;
-}
-
-.stats-number {  
-    font-family: "Courier New", Courier, monospace;
+.stats-date-location {
     font-size: 18px;
 }
 
-.stats-alt-button {
-    @extend .transparent-button;
-    font-size: 20px;
-    //float: right;
-    padding: 4px 14px;
-}
-
-.stats-alt-button:hover {
-    color: rgb(128,128,128);
-}
-
-.stats-result {
-    min-height: 300px;
+.stats-name-club {
+    font-size: 22px;
 }

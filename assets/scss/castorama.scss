@@ -42,7 +42,7 @@ $event-icon-size: 42px;
 }
 
 #footer {
-    width: 100%;  
+    width: (100% - ($page-padding-right + $page-padding-left));
     font-size: 10px;
     padding: 3% $page-padding-right 1% $page-padding-left;
 }
@@ -190,4 +190,34 @@ img.image-clickable:hover {
     font-size: 24px;
     border-radius:6px;
     padding: 5px;
+}
+
+col {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.col-sel {
+    @extend col;
+    background-color: rgba(0,0,0,0.15);
+}
+.col-35 {
+    @extend col;
+    width: 35%;
+}
+.col-33 {
+    @extend col;
+    width: 33%;
+}
+.col-20 {
+    @extend col;
+    width: 20%;
+}
+.col-15 {
+    @extend col;
+    width: 15%;
+}
+.col-13 {
+    @extend col;
+    width: 13%;
 }

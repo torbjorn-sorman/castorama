@@ -10,11 +10,11 @@ var app = angular.module('castorama', ['ngRoute', 'castorama.services', 'castora
 app.config(function ($routeProvider, $locationProvider) {
     $routeProvider
     .when('/', {
-        templateUrl: '/index.php/home',
+        templateUrl: '/home',
         controller: 'HomeController'
     })
     .when('/home', {
-        templateUrl: '/index.php/home',
+        templateUrl: '/home',
         controller: 'HomeController'
     })
     .when('/stats', {

@@ -46,6 +46,7 @@ class Stats extends CI_Controller
             $cond['location LIKE'] = "%".$input->location."%";        
         
         $this->db->order_by($input->orderby, $input->orderbydir);
+        $this->db->order_by('id', 'ASC');
         if ($this->isEvent($input->orderby)) {
             $cond[$input->orderby . ' >'] = 0;
         }

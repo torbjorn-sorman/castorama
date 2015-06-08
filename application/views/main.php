@@ -11,6 +11,7 @@
     <script type="text/javascript" src="/assets/js/services.js"></script>
     <script type="text/javascript" src="/assets/js/controllers.js"></script>
     <script type="text/javascript" src="/assets/js/filters.js"></script>
+    <script type="text/javascript" src="/assets/js/directives.js"></script>
     <script type="text/javascript" src="/assets/js/app.js"></script>
     <script type="text/javascript" src="/assets/js/models/castorama.js"></script>
 

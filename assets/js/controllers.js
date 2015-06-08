@@ -1,13 +1,12 @@
-﻿angular.module('castorama.controllers', [])
+﻿
+angular.module('castorama.controllers', [])
 
-.controller('MainController', function ($scope, $location, User) {
+.controller('MainController', function ($scope, $location, User)
+{
     $scope.navigate = function (path, ind) {
         User.status.nav = ind;
         $location.path(path);
     };
-    $scope.navClass = function (ind) {
-        return ind == $scope.status.nav ? "button-selected" : "button-navigation";
-    }
     $scope.logout = function () {
         User.logout(function (data) { if (data) $location.path('home'); });
     };
@@ -15,7 +14,8 @@
     User.refresh();
 })
 
-.controller('HomeController', function ($scope, ScoreTable, User) {
+.controller('HomeController', function ($scope, ScoreTable, User)
+{
     User.status.nav = 0;
     $scope.castorama = new Castorama(ScoreTable);
     $scope.genderSelect = function (gen) {
@@ -23,7 +23,10 @@
     }
 })
 
-.controller('StatsController', function ($scope, $http, $filter) {
+.controller('StatsController', function ($scope, $http, $filter, $timeout)
+{
+    var refreshQueued = false;
+    var loading = false;
     var canLoadMore = true;
     var offset = 0;
     var limit = 25;
@@ -50,52 +53,50 @@
       new OrderItem("Diskus", 'discus', 'discus'),
       new OrderItem("Slägga", 'hammer', 'hammer')
     ];
-    $scope.orderItems = orderingItems;
-    $scope.loading = false;
+    
     $scope.showSearch = false;
     $scope.showOptions = false;
+
+    $scope.orderItems = orderingItems;
     $scope.opt = options;
-
-    
-
     $scope.search = search;
     $scope.result = [];
-    $scope.addMoreItems = function () {        
-        $scope.loading = true;
-
-        console.log(postData(limit, offset));
-
-        $http.post('/stats/search/', postData(limit, offset)).success(function (data) {
-            $scope.loading = false;
-            canLoadMore = (data.length == limit);
-            for (var i = 0; i < data.length; ++i) {
-                $scope.result.push(data[i]);
+    $scope.noMoreContent = function () {
+        return !canLoadMore;
+    };
+    $scope.showLoading = function () {
+        return loading;
+    }
+    $scope.refresh = function (reset) {
+        if (loading) {
+            if (!refreshQueued) {
+                refreshQueued = true;
+                $timeout($scope.refresh, 1000, true, reset);
             }
-            offset += data.length;
-        });
-    };
-    $scope.moreItemsCanBeLoaded = function () {
-        return canLoadMore;
-    };
-    $scope.refresh = function () {
-        $scope.result = [];
-        offset = 0;
-        $scope.loading = false;
-        canLoadMore = true;
-        $scope.addMoreItems();
+        } else {
+            refreshQueued = false;
+            if (reset) {
+                $scope.result = [];
+                offset = 0;
+                canLoadMore = true;
+            }
+            console.log(postData(limit, offset));
+            loading = true;
+            $http.post('/stats/search/', postData(limit, offset)).success(function (data) {                
+                for (var i = 0; i < data.length; ++i)
+                    $scope.result.push(data[i]);
+                offset += data.length;
+                loading = false;
+                canLoadMore = (data.length == limit);
+            });
+        }
     }
     $scope.$watch('opt', function () {
-        $scope.refresh();
+        $scope.refresh(true);
     }, true);
     $scope.$watch('search', function () {        
-        $scope.refresh();
+        $scope.refresh(true);
     }, true);
-    $scope.toggleSearch = function () {
-        $scope.showSearch = !$scope.showSearch;
-    };
-    $scope.toggleOptions = function () {
-        $scope.showOptions = !$scope.showOptions;
-    };
     $scope.clearSearch = function () {
         $scope.search = {
             name: "",
@@ -109,7 +110,10 @@
         var text = val, fixed;
         return text.replace(/(^\d?\d)(\d\d)/, "$1,$2");
     }
-
+    $scope.nonEventSelected = function() {
+        var p = $scope.opt.order;
+        return p == 'name' || p == 'date' || p == 'location' || p == 'club';
+    }
     function postData(limit, offset) {
         var d = {
             fromdate: $filter('date')($scope.opt.from, 'yyyy-MM-dd'),
