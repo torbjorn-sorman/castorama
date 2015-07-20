@@ -6,6 +6,7 @@ class Parser extends MY_Controller
     private $cntM = 0;
     private $cntW = 0;
     private $url = "http://www.friidrott.se/rs/resultat.aspx";
+    private $url_old = "http://www.friidrott.se/rs/resultat2/castarkiv/cast%02d/cast%02dres.aspx";
     private $year = 0;
     private $clubRej = array();
     private $whitelist;  
@@ -156,6 +157,17 @@ class Parser extends MY_Controller
             $this->year = $year;
             $doc = new DOMDocument();
             @$doc->loadHTML(file_get_contents($this->url."?year=$year&type=11"));      
+            $list = $doc->getElementById('marginal')->getElementsByTagName('p');
+            $keys = $this->getKeys($tableName, $year);
+            $validKeys = array();
+            foreach($list as $item)
+                $this->parseItem($doc, $item, $tableName, $keys, $validKeys);        
+            $this->removeRows($tableName, $keys, $validKeys);
+        }
+        foreach(range(1997, 2000, 1) as $year) {
+            $this->year = $year;
+            $doc = new DOMDocument();
+            @$doc->loadHTML(file_get_contents(sprintf($this->url_old, $year % 100, $year % 100)));
             $list = $doc->getElementById('marginal')->getElementsByTagName('p');
             $keys = $this->getKeys($tableName, $year);
             $validKeys = array();

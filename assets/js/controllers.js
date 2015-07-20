@@ -62,7 +62,7 @@ angular.module('castorama.controllers', [])
     $scope.search = search;
     $scope.result = [];
     $scope.noMoreContent = function () {
-        return !canLoadMore;
+        return !canLoadMore && !loading;
     };
     $scope.showLoading = function () {
         return loading;
@@ -71,16 +71,18 @@ angular.module('castorama.controllers', [])
         if (loading) {
             if (!refreshQueued) {
                 refreshQueued = true;
-                $timeout($scope.refresh, 1000, true, reset);
+                $timeout($scope.refresh, 1000, true, true);
             }
         } else {
             refreshQueued = false;
             if (reset) {
+                console.log('reset');
                 $scope.result = [];
                 offset = 0;
                 canLoadMore = true;
             }
             console.log(postData(limit, offset));
+            console.log($scope.result.length);
             loading = true;
             $http.post('/stats/search/', postData(limit, offset)).success(function (data) {                
                 for (var i = 0; i < data.length; ++i)

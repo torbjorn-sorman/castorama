@@ -41,7 +41,6 @@
                 <br />
             </p>
             <p>
-                <span>Sortera resultat:</span>
                 <button ng-repeat="p in orderItems" ng-if="$index >= 4" class="stats-alt-button {{ opt.order == p.column ? 'selected' : '' }}" ng-click="opt.order = p.column">
                     <span ng-if="!p.isImg">{{p.title}}</span>
                     <img ng-if="p.isImg" class="icon-small image-clickable" ng-src="{{'assets/img/events/' + p.name + (opt.order == p.column ? '-inverted' : '') + '.png'}}" src="//:0" />
