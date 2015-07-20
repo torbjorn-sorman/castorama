@@ -14,7 +14,7 @@ app.config(function ($routeProvider, $locationProvider) {
         controller: 'HomeController'
     })
     .when('/home', {
-        templateUrl: '/home',
+        templateUrl: '/index.php/home',
         controller: 'HomeController'
     })
     .when('/stats', {
