@@ -23,7 +23,7 @@
 <body ng-controller="MainController">
     <div id="container">
         <div id="header">
-            <h1 class="castorama-font">CASTORAMA.SE is the shit!</h1>
+            <h1 class="castorama-font">CASTORAMA.SE</h1>
             <div class="bordered">
                 <div class="nav-main {{ status.nav == 0 ? 'nav-sel' : '' }} ion-calculator" ng-click="navigate('home', 0)">&nbsp;Ber&auml;kna</div>
                 <div class="nav-main {{ status.nav == 1 ? 'nav-sel' : '' }} ion-stats-bars" ng-click="navigate('stats', 1)">&nbsp;Statistik</div>

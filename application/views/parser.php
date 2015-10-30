@@ -3,7 +3,7 @@
     <h2>Uppdatera</h2>
     <button class="parser-start-button ion-document-text" ng-click="updateDB(year)">&nbsp;Starta</button>
     <p>V&auml;lj &aring;r:
-        <select ng-model="year" ng-options="y for y in [] | range:2001:2014"></select></p>
+        <select ng-model="year" ng-options="y for y in [] | range:2001:2015"></select></p>
     
     <div ng-if="response.update.message">
         <textarea rows="3" cols="40">{{response.update.text}}</textarea>
@@ -15,7 +15,7 @@
     <button class="parser-start-button ion-document-text" ng-click="updateSeason(season)">&nbsp;Starta</button>
     
     <p>V&auml;lj &aring;r:
-        <select ng-model="season" ng-options="y for y in [] | range:2001:2014"></select></p>
+        <select ng-model="season" ng-options="y for y in [] | range:2001:2015"></select></p>
     
     <div ng-if="response.season.message">
         <textarea rows="3" cols="40">{{response.season.text}}</textarea>
